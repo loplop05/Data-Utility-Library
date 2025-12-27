@@ -1,71 +1,93 @@
 import pandas as pd
 import numpy as np
 
-def importData(dataFrame: pd.DataFrame):
-    return dataFrame
+class DataTools:
+    def __init__(self, df: pd.DataFrame):
+        self.df = df.copy()
 
+    # ----- inspection -----
+    def importData(self, df: pd.DataFrame):
+        self.df = df.copy()
+        return self.df
 
-def insightData(dataFrame: pd.DataFrame):
-    return dataFrame.describe().transpose()
+    def insightData(self):
+        return self.df.describe().transpose()
 
+    def dataHead(self, n: int = 5):
+        return self.df.head(n)
 
-def dataHead(dataFrame: pd.DataFrame, n: int = 5):
-    return dataFrame.head(n)
+    def dataFoot(self, n: int = 5):
+        return self.df.tail(n)
 
+    # ----- missing values -----
+    def dataNaCount(self, column: str = None):
+        if column:
+            return self.df[column].isna().sum()
+        return self.df.isna().sum()
 
-def dataFoot(dataFrame: pd.DataFrame, n: int = 5):
-    return dataFrame.tail(n)
+    def dataNaDrop(self, column: str = None):
+        if column:
+            self.df = self.df.dropna(subset=[column])
+        else:
+            self.df = self.df.dropna()
+        return self.df
 
+    def dataDropDuplicate(self, column: str = None):
+        if column:
+            self.df = self.df.drop_duplicates(subset=[column])
+        else:
+            self.df = self.df.drop_duplicates()
+        return self.df
 
-def dataNaCount(dataFrame: pd.DataFrame, column: str = None):
-    if column:
-        return dataFrame[column].isna().sum()
-    return dataFrame.isna().sum()
+    def fillMissingWithMean(self, column: str = None):
+        if column:
+            self.df[column] = self.df[column].fillna(self.df[column].mean())
+        else:
+            self.df = self.df.fillna(self.df.mean(numeric_only=True))
+        return self.df
 
+    def fillMissingWithMedian(self, column: str = None):
+        if column:
+            self.df[column] = self.df[column].fillna(self.df[column].median())
+        else:
+            self.df = self.df.fillna(self.df.median(numeric_only=True))
+        return self.df
 
-def dataNaDrop(dataFrame: pd.DataFrame, column: str = None):
-    if column:
-        return dataFrame.dropna(subset=[column])
-    return dataFrame.dropna()
+    def fillMissingWithMin(self, column: str = None):
+        if column:
+            self.df[column] = self.df[column].fillna(self.df[column].min())
+        else:
+            self.df = self.df.fillna(self.df.min(numeric_only=True))
+        return self.df
 
+    def fillMissingWithMax(self, column: str = None):
+        if column:
+            self.df[column] = self.df[column].fillna(self.df[column].max())
+        else:
+            self.df = self.df.fillna(self.df.max(numeric_only=True))
+        return self.df
 
-def dataDropDuplicate(dataFrame: pd.DataFrame, column: str = None):
-    if column:
-        return dataFrame.drop_duplicates(subset=[column])
-    return dataFrame.drop_duplicates()
+    # ----- types -----
+    def to_int(self, column: str):
+        self.df[column] = self.df[column].astype("int64")
+        return self.df
 
+    def to_float(self, column: str):
+        self.df[column] = self.df[column].astype("float64")
+        return self.df
 
-def fillMissingWithMean(dataFrame: pd.DataFrame, column: str = None):
-    df = dataFrame.copy()
-    if column:
-        df[column] = df[column].fillna(df[column].mean())
-    else:
-        df = df.fillna(df.mean(numeric_only=True))
-    return df
+    def to_string(self, column: str):
+        self.df[column] = self.df[column].astype("string")
+        return self.df
 
+    def to_bool(self, column: str):
+        self.df[column] = self.df[column].astype("bool")
+        return self.df
 
-def fillMissingWithMedian(dataFrame: pd.DataFrame, column: str = None):
-    df = dataFrame.copy()
-    if column:
-        df[column] = df[column].fillna(df[column].median())
-    else:
-        df = df.fillna(df.median(numeric_only=True))
-    return df
+    def to_datetime(self, column: str):
+        self.df[column] = pd.to_datetime(self.df[column])
+        return self.df
 
-
-def fillMissingWithMin(dataFrame: pd.DataFrame, column: str = None):
-    df = dataFrame.copy()
-    if column:
-        df[column] = df[column].fillna(df[column].min())
-    else:
-        df = df.fillna(df.min(numeric_only=True))
-    return df
-
-
-def fillMissingWithMax(dataFrame: pd.DataFrame, column: str = None):
-    df = dataFrame.copy()
-    if column:
-        df[column] = df[column].fillna(df[column].max())
-    else:
-        df = df.fillna(df.max(numeric_only=True))
-    return df
+    def to_category(self, column: str):
+        self.df[column] = self.df[column].astype("category")
+        return self.df
