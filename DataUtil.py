@@ -66,7 +66,9 @@ class DataTools:
         else:
             self.df = self.df.fillna(self.df.max(numeric_only=True))
         return self.df
-
+    """
+    out liar function 
+    """
     def detectOutliersIQR(df: pd.DataFrame, k: float = 1.5) -> pd.DataFrame:
         """
         Returns rows that contain outliers in any numeric column
