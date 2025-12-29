@@ -66,7 +66,29 @@ class DataTools:
         else:
             self.df = self.df.fillna(self.df.max(numeric_only=True))
         return self.df
+    """
+    out liar function 
+    """
+    def detectOutliersIQR(df: pd.DataFrame, k: float = 1.5) -> pd.DataFrame:
+        """
+        Returns rows that contain outliers in any numeric column
+        using the IQR method.
+        """
 
+        # Boolean mask for rows with at least one outlier
+        outlier_mask = pd.Series(False, index=df.index)
+
+        for col in df.select_dtypes(include="number"):
+            q1 = df[col].quantile(0.25)
+            q3 = df[col].quantile(0.75)
+            iqr = q3 - q1
+
+            lower = q1 - k * iqr
+            upper = q3 + k * iqr
+
+            outlier_mask |= (df[col] < lower) | (df[col] > upper)
+
+        return df[outlier_mask]
     # ----- types -----
     def to_int(self, column: str):
         self.df[column] = self.df[column].astype("int64")
