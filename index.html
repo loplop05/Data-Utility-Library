@@ -1,10 +1,1222 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DataUtility Documentation</title>
+  <meta name="description" content="DataUtility: a modular pandas-based toolkit for data cleaning, EDA, outliers, encoding, scaling, feature engineering, text cleaning, and type conversions." />
+  <style>
+    :root{
+      --bg: #070B14;
+      --bg2:#0B1324;
+      --panel: rgba(16, 26, 46, 0.72);
+      --panel2: rgba(16, 26, 46, 0.55);
+      --line: rgba(120, 160, 255, 0.16);
+      --line2: rgba(120, 160, 255, 0.22);
+      --text: #EAF1FF;
+      --muted: rgba(234, 241, 255, 0.70);
+      --muted2: rgba(234, 241, 255, 0.55);
+      --accent: #62A8FF;
+      --accent2:#7EF0D8;
+      --warn:#FFD479;
+      --good:#7EF0D8;
+      --bad:#FF7EA6;
+      --shadow: 0 24px 60px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius2: 14px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      --tap: 44px;
+      --blur: blur(14px);
+      --max: 1180px;
+    }
+
+    /* Light theme */
+    [data-theme="light"]{
+      --bg: #f7f9ff;
+      --bg2:#eef3ff;
+      --panel: rgba(255, 255, 255, 0.78);
+      --panel2: rgba(255, 255, 255, 0.60);
+      --line: rgba(40, 80, 150, 0.15);
+      --line2: rgba(40, 80, 150, 0.20);
+      --text: #0c1a33;
+      --muted: rgba(12, 26, 51, 0.72);
+      --muted2: rgba(12, 26, 51, 0.55);
+      --accent: #2563eb;
+      --accent2:#0ea5e9;
+      --shadow: 0 22px 55px rgba(7, 24, 64, .12);
+      --blur: blur(10px);
+    }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+    body{
+      margin:0;
+      font-family: var(--sans);
+      color: var(--text);
+      background:
+        radial-gradient(1100px 520px at 12% -5%, rgba(98,168,255,.22), transparent 55%),
+        radial-gradient(900px 420px at 94% 8%, rgba(126,240,216,.14), transparent 55%),
+        radial-gradient(700px 380px at 65% 110%, rgba(255,212,121,.07), transparent 60%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      line-height: 1.6;
+      overflow-x:hidden;
+    }
+
+    /* Subtle moving glow */
+    .glow{
+      position: fixed;
+      inset:-200px;
+      pointer-events:none;
+      background:
+        radial-gradient(650px 420px at var(--gx, 30%) var(--gy, 25%), rgba(98,168,255,.18), transparent 60%),
+        radial-gradient(680px 420px at calc(var(--gx, 30%) + 35%) calc(var(--gy, 25%) + 20%), rgba(126,240,216,.12), transparent 60%);
+      filter: blur(10px);
+      opacity: .8;
+      z-index:-1;
+      transition: opacity .4s ease;
+    }
+
+    a{ color: var(--accent); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+
+    .wrap{ max-width: var(--max); margin: 0 auto; padding: 18px; }
+
+    /* Top bar */
+    header{
+      position: sticky;
+      top:0;
+      z-index: 60;
+      border-bottom: 1px solid var(--line);
+      background: rgba(7,11,20,.50);
+      backdrop-filter: var(--blur);
+    }
+    [data-theme="light"] header{ background: rgba(247,249,255,.72); }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      min-height: 64px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width: 280px;
+    }
+    .logo{
+      width:42px; height:42px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(98,168,255,.95), rgba(126,240,216,.35));
+      border: 1px solid rgba(98,168,255,.35);
+      box-shadow: 0 16px 40px rgba(98,168,255,.18);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 60%);
+      transform: rotate(25deg);
+      opacity:.35;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 16px;
+      letter-spacing:.3px;
+      line-height: 1.1;
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .search{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding: 10px 12px;
+      min-height: var(--tap);
+      border-radius: 999px;
+      border: 1px solid var(--line2);
+      background: var(--panel2);
+      box-shadow: 0 14px 35px rgba(0,0,0,.12);
+    }
+    .search input{
+      width: 260px;
+      max-width: 42vw;
+      border:0;
+      outline:none;
+      background: transparent;
+      color: var(--text);
+      font-size: 13px;
+    }
+    .search input::placeholder{ color: var(--muted2); }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      padding: 10px 12px;
+      min-height: var(--tap);
+      border-radius: 999px;
+      border: 1px solid var(--line2);
+      background: var(--panel2);
+      color: var(--text);
+      cursor:pointer;
+      user-select:none;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    .btn:hover{ background: var(--panel); border-color: rgba(98,168,255,.28); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(98,168,255,.95), rgba(98,168,255,.35));
+      border-color: rgba(98,168,255,.35);
+    }
+
+    /* Layout */
+    .layout{
+      display:grid;
+      grid-template-columns: 290px 1fr;
+      gap: 18px;
+      margin-top: 16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+      .brand{ min-width: unset; }
+      .search input{ width: 160px; }
+    }
+
+    /* Sidebar */
+    aside{
+      position: sticky;
+      top: 84px;
+      height: calc(100vh - 96px);
+      overflow: auto;
+      padding-right: 4px;
+    }
+    @media (max-width: 980px){
+      aside{ position: static; height: auto; }
+    }
+
+    .panel{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .side{
+      padding: 14px;
+    }
+    .side h2{
+      margin: 6px 0 10px;
+      font-size: 13px;
+      letter-spacing: .22px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .nav{
+      display:grid;
+      gap: 6px;
+      padding-bottom: 8px;
+    }
+    .nav a{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      background: rgba(16,26,46,.18);
+      color: var(--text);
+      transition: background .2s ease, border-color .2s ease;
+      font-size: 13px;
+    }
+    [data-theme="light"] .nav a{ background: rgba(12,26,51,.04); }
+    .nav a:hover{ background: rgba(98,168,255,.12); border-color: rgba(98,168,255,.18); text-decoration:none; }
+    .nav a.active{
+      background: rgba(98,168,255,.16);
+      border-color: rgba(98,168,255,.28);
+    }
+    .nav .hint{ color: var(--muted2); font-size: 12px; }
+
+    .chips{
+      display:flex;
+      flex-wrap:wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .chip{
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,46,.18);
+      color: var(--muted);
+    }
+
+    /* Content */
+    .content{
+      padding: 14px;
+    }
+    .hero{
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(98,168,255,.14), transparent 40%),
+        var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .hero h2{
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: .2px;
+    }
+    .hero p{ margin: 0; color: var(--muted); max-width: 76ch; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      padding: 16px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .card h3{
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+    .card p{ margin: 0; color: var(--muted); }
+
+    .section{
+      margin-top: 14px;
+      padding: 0;
+      overflow:hidden;
+    }
+
+    details{
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    summary{
+      list-style:none;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      user-select:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    .sumleft{
+      display:flex;
+      flex-direction:column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .sumtitle{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 700;
+      letter-spacing:.2px;
+      font-size: 15px;
+    }
+    .sumdesc{
+      color: var(--muted);
+      font-size: 12.8px;
+      white-space: nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 78ch;
+    }
+    .chev{
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      display:grid;
+      place-items:center;
+      border: 1px solid var(--line);
+      background: rgba(16,26,46,.18);
+      transition: transform .18s ease, background .2s ease;
+      flex: 0 0 auto;
+    }
+    details[open] .chev{ transform: rotate(180deg); background: rgba(98,168,255,.12); }
+
+    .inner{
+      padding: 0 16px 16px;
+      color: var(--muted);
+    }
+
+    /* Code blocks + copy */
+    .codewrap{
+      position:relative;
+      margin: 12px 0;
+    }
+    pre{
+      margin: 0;
+      padding: 14px 14px 14px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(7, 11, 20, 0.55);
+      overflow:auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text);
+    }
+    [data-theme="light"] pre{
+      background: rgba(247,249,255,.80);
+      color: var(--text);
+    }
+    .copy{
+      position:absolute;
+      top: 10px;
+      right: 10px;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line2);
+      background: rgba(16,26,46,.45);
+      color: var(--text);
+      font-size: 12px;
+      cursor:pointer;
+      transition: background .2s ease, transform .12s ease;
+    }
+    [data-theme="light"] .copy{ background: rgba(255,255,255,.7); }
+    .copy:hover{ background: rgba(98,168,255,.16); }
+    .copy:active{ transform: translateY(1px); }
+    .copy.ok{ border-color: rgba(126,240,216,.35); background: rgba(126,240,216,.10); }
+
+    /* Tabs */
+    .tabs{
+      display:flex;
+      gap: 8px;
+      flex-wrap:wrap;
+      margin: 10px 0 12px;
+    }
+    .tab{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,46,.18);
+      color: var(--text);
+      cursor:pointer;
+      font-size: 12.8px;
+      user-select:none;
+      transition: background .2s ease, border-color .2s ease;
+    }
+    .tab:hover{ background: rgba(98,168,255,.12); border-color: rgba(98,168,255,.18); }
+    .tab.active{ background: rgba(98,168,255,.16); border-color: rgba(98,168,255,.28); }
+
+    .tabpanel{ display:none; }
+    .tabpanel.active{ display:block; }
+
+    /* Highlight search matches */
+    mark{
+      background: rgba(255,212,121,.25);
+      color: inherit;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+
+    /* Back to top */
+    .fab{
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 80;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      pointer-events:none;
+    }
+    .fab .btn{
+      pointer-events:auto;
+      border-radius: 999px;
+      box-shadow: 0 18px 45px rgba(0,0,0,.22);
+    }
+    .fab.hidden{ display:none; }
+
+    /* Footer */
+    footer{
+      margin-top: 14px;
+      padding: 14px 2px 4px;
+      color: var(--muted2);
+      font-size: 12.8px;
+      border-top: 1px solid var(--line);
+    }
+
+    /* Small helpers */
+    .kvs{
+      display:grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kv{
+      padding: 12px 12px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--line);
+      background: rgba(16,26,46,.12);
+    }
+    [data-theme="light"] .kv{ background: rgba(12,26,51,.03); }
+    .kv b{ display:block; color: var(--text); margin-bottom: 4px; }
+    .note{
+      border-left: 3px solid rgba(98,168,255,.6);
+      padding: 10px 12px;
+      background: rgba(98,168,255,.08);
+      border-radius: 12px;
+      margin: 10px 0;
+      color: var(--muted);
+    }
+    .warn{
+      border-left-color: rgba(255,212,121,.7);
+      background: rgba(255,212,121,.09);
+    }
+    .good{
+      border-left-color: rgba(126,240,216,.7);
+      background: rgba(126,240,216,.08);
+    }
+  </style>
 </head>
+
 <body>
-$END$
+  <div class="glow" aria-hidden="true"></div>
+
+  <header>
+    <div class="wrap topbar">
+      <div class="brand" role="banner">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>DataUtility Documentation</h1>
+          <p>Modular pandas toolkit for data cleaning, EDA, outliers, encoding, scaling, and feature engineering</p>
+        </div>
+      </div>
+
+      <div class="actions" role="navigation" aria-label="Top actions">
+        <div class="search" role="search">
+          <span aria-hidden="true">Search</span>
+          <input id="search" type="search" placeholder="Find methods, sections, examples..." />
+        </div>
+        <button class="btn" id="toggleTheme" type="button" title="Toggle theme">Theme</button>
+        <button class="btn primary" id="expandAll" type="button" title="Expand all sections">Expand</button>
+        <button class="btn" id="collapseAll" type="button" title="Collapse all sections">Collapse</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="layout">
+      <aside>
+        <div class="panel side">
+          <h2>Contents</h2>
+          <div class="nav" id="nav">
+            <a href="#overview"><span>Overview</span><span class="hint">What it is</span></a>
+            <a href="#quickstart"><span>Quick Start</span><span class="hint">Install + import</span></a>
+            <a href="#structure"><span>Project Structure</span><span class="hint">Modules</span></a>
+            <a href="#design"><span>Design Principles</span><span class="hint">Rules</span></a>
+            <a href="#inspection"><span>Inspection and EDA</span><span class="hint">overview(), insights()</span></a>
+            <a href="#missing"><span>Missing and Duplicates</span><span class="hint">fillMissingValues()</span></a>
+            <a href="#outliers"><span>Outliers</span><span class="hint">IQR + Z-score</span></a>
+            <a href="#encoding"><span>Encoding</span><span class="hint">oneHotEncode()</span></a>
+            <a href="#scaling"><span>Scaling</span><span class="hint">scale()</span></a>
+            <a href="#features"><span>Feature Engineering</span><span class="hint">combineFeatures()</span></a>
+            <a href="#text"><span>Text Cleaning</span><span class="hint">cleanText()</span></a>
+            <a href="#types"><span>Type Conversion</span><span class="hint">to_datetime()</span></a>
+            <a href="#license"><span>License</span><span class="hint">Use</span></a>
+          </div>
+
+          <div class="chips" aria-label="Tags">
+            <div class="chip">DataTools</div>
+            <div class="chip">inplace</div>
+            <div class="chip">validation</div>
+            <div class="chip">modular</div>
+            <div class="chip">student-friendly</div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="content">
+        <div class="hero" id="overview">
+          <h2>Overview</h2>
+          <p>
+            DataUtility is a lightweight and modular Python utility library built on top of pandas to simplify
+            data cleaning, exploration, and preprocessing. It offers a consistent interface through a single class:
+            <code>DataTools</code>, while the implementation stays organized across separate modules.
+          </p>
+
+          <div class="grid" style="margin-top:14px">
+            <div class="card" style="box-shadow:none">
+              <h3>Why this library exists</h3>
+              <p>
+                Many projects repeat the same steps: inspecting datasets, handling missing values, detecting outliers,
+                encoding and scaling features, and creating derived features. DataUtility keeps those tasks consistent
+                and reusable without advanced complexity.
+              </p>
+            </div>
+            <div class="card" style="box-shadow:none">
+              <h3>What “safe” means here</h3>
+              <p>
+                Methods validate columns and types, avoid silent behavior, and support <code>inplace=True/False</code>
+                so you can choose between modifying <code>dt.df</code> or returning a new DataFrame.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="section" id="quickstart">
+          <details open>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Quick Start</div>
+                <div class="sumdesc">Install requirements and create your first DataTools instance</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="note good">
+                Put this file at <code>docs/index.html</code>. Open it in your browser. Commit it to GitHub so your project has nice documentation.
+              </div>
+
+              <div class="codewrap">
+                <button class="copy" data-copy="c-req">Copy</button>
+                <pre id="c-req"><code>pip install pandas numpy</code></pre>
+              </div>
+
+              <div class="codewrap">
+                <button class="copy" data-copy="c-import">Copy</button>
+                <pre id="c-import"><code>import pandas as pd
+from data_utility import DataTools
+
+df = pd.read_csv("data.csv")
+dt = DataTools(df)</code></pre>
+              </div>
+
+              <div class="note warn">
+                If you split into modules, ensure <code>data_utility/__init__.py</code> exports <code>DataTools</code>.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="structure">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Project Structure</div>
+                <div class="sumdesc">Modular files combined into one DataTools class</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="codewrap">
+                <button class="copy" data-copy="c-structure">Copy</button>
+                <pre id="c-structure"><code>data_utility/
+├── __init__.py
+├── data_tools.py        # main public interface
+│
+├── base.py              # shared helpers and validation
+├── io_tools.py          # data loading utilities
+├── eda.py               # inspection and overview
+├── missing.py           # missing values and duplicates
+├── outliers.py          # IQR and Z-score logic
+├── encoding.py          # encoding helpers
+├── scaling.py           # scaling utilities
+├── features.py          # feature engineering
+├── text_cleaning.py     # text preprocessing
+└── types.py             # dtype transformations</code></pre>
+              </div>
+
+              <div class="note">
+                The <code>data_tools.py</code> file imports each module class and combines them using multiple inheritance.
+                You still use only <code>DataTools</code> in your projects.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="design">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Design Principles</div>
+                <div class="sumdesc">Consistency rules used across every method</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="kvs">
+                <div class="kv">
+                  <b>Single entry point</b>
+                  Use <code>DataTools</code> as the only class you instantiate.
+                </div>
+                <div class="kv">
+                  <b>All methods operate on self.df</b>
+                  Internal modules assume <code>self.df</code> and helper methods exist (from <code>BaseTools</code>).
+                </div>
+                <div class="kv">
+                  <b>inplace=True/False is respected</b>
+                  No hard-coded inplace behavior; always pass the argument to <code>_apply(..., inplace)</code>.
+                </div>
+                <div class="kv">
+                  <b>Validation everywhere</b>
+                  Clear errors for missing columns or non-numeric operations.
+                </div>
+                <div class="kv">
+                  <b>Predictable output</b>
+                  Each method returns either a DataFrame or a boolean mask, clearly documented.
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="inspection">
+          <details open>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Inspection and EDA</div>
+                <div class="sumdesc">head(), tail(), insights(), overview(), missingReport()</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="tabs" role="tablist" aria-label="EDA examples">
+                <div class="tab active" data-tab="eda-1" role="tab" aria-selected="true">Basic</div>
+                <div class="tab" data-tab="eda-2" role="tab" aria-selected="false">Overview</div>
+              </div>
+
+              <div class="tabpanel active" id="eda-1" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-eda1">Copy</button>
+                  <pre id="c-eda1"><code>dt.head()
+dt.tail()
+dt.insights()</code></pre>
+                </div>
+              </div>
+
+              <div class="tabpanel" id="eda-2" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-eda2">Copy</button>
+                  <pre id="c-eda2"><code>summary, info = dt.overview()
+print(summary)
+print(info)
+
+dt.missingReport()</code></pre>
+                </div>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="missing">
+          <details open>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Missing Values and Duplicates</div>
+                <div class="sumdesc">fillMissingValues(), dropMissingValues(), fillMissingGroupBy(), dropDuplicates()</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="tabs" role="tablist" aria-label="Missing values examples">
+                <div class="tab active" data-tab="miss-1" role="tab" aria-selected="true">Fill</div>
+                <div class="tab" data-tab="miss-2" role="tab" aria-selected="false">Drop</div>
+                <div class="tab" data-tab="miss-3" role="tab" aria-selected="false">Group-based</div>
+              </div>
+
+              <div class="tabpanel active" id="miss-1" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-miss1">Copy</button>
+                  <pre id="c-miss1"><code>dt.fillMissingValues("mean")
+dt.fillMissingValues("median", columns=["age"])
+dt.fillMissingValues("mode", columns=["city"])
+dt.fillMissingValues("value", value=0)</code></pre>
+                </div>
+              </div>
+
+              <div class="tabpanel" id="miss-2" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-miss2">Copy</button>
+                  <pre id="c-miss2"><code># Drop rows with too many missing values
+dt.dropMissingValues(axis=0, thresh=5)
+
+# Drop columns with too many missing values
+dt.dropMissingValues(axis=1, thresh=100)</code></pre>
+                </div>
+              </div>
+
+              <div class="tabpanel" id="miss-3" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-miss3">Copy</button>
+                  <pre id="c-miss3"><code># Fill salary per department using median (default)
+dt.fillMissingGroupBy("department", "salary")
+
+# Or use mean or mode
+dt.fillMissingGroupBy("department", "salary", strategy="mean")
+dt.fillMissingGroupBy("department", "city", strategy="mode")</code></pre>
+                </div>
+              </div>
+
+              <div class="note">
+                Duplicate removal supports full-row duplicates or subset-based duplicates.
+              </div>
+
+              <div class="codewrap">
+                <button class="copy" data-copy="c-dups">Copy</button>
+                <pre id="c-dups"><code>dt.dropDuplicates()
+dt.dropDuplicates(columns=["email"])
+dt.dropDuplicates(columns=["email"], keep="last")
+dt.dropDuplicates(columns=["email"], keep=False)</code></pre>
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="outliers">
+          <details open>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Outliers</div>
+                <div class="sumdesc">IQR and Z-score: masks, filtering, and clipping</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="tabs" role="tablist" aria-label="Outliers examples">
+                <div class="tab active" data-tab="out-1" role="tab" aria-selected="true">IQR</div>
+                <div class="tab" data-tab="out-2" role="tab" aria-selected="false">Z-score</div>
+              </div>
+
+              <div class="tabpanel active" id="out-1" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-iqr">Copy</button>
+                  <pre id="c-iqr"><code># Detect outlier rows (IQR)
+outliers = dt.detect_outliers_iqr()
+
+# Get mask for outliers (IQR)
+mask = dt.outlier_mask_iqr()
+
+# Clip outliers (IQR)
+dt.clip_outliers_iqr(inplace=True)</code></pre>
+                </div>
+              </div>
+
+              <div class="tabpanel" id="out-2" role="tabpanel">
+                <div class="codewrap">
+                  <button class="copy" data-copy="c-z">Copy</button>
+                  <pre id="c-z"><code># Detect outlier rows (Z-score)
+outliers = dt.detect_outliers_zscore(z=3)
+
+# Get mask for outliers (Z-score)
+mask = dt.outlier_mask_zscore(z=3)
+
+# Clip outliers (Z-score)
+dt.clip_outliers_zscore(z=3, inplace=True)</code></pre>
+                </div>
+              </div>
+
+              <div class="note warn">
+                In real ML workflows, clipping outliers is often safer than dropping rows (less data loss).
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="encoding">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Encoding</div>
+                <div class="sumdesc">oneHotEncode() and labelEncode()</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="codewrap">
+                <button class="copy" data-copy="c-enc">Copy</button>
+                <pre id="c-enc"><code># One-hot encode (auto-detect categorical columns)
+dt.oneHotEncode()
+
+# One-hot encode specific columns
+dt.oneHotEncode(columns=["city", "dept"], drop_first=True)
+
+# Label encode one column (optional mapping)
+df_encoded, mapping = dt.labelEncode("category", return_mapping=True)</code></pre>
+              </div>
+
+              <div class="note warn">
+                Label encoding creates integers for categories. For ML models, one-hot encoding is often safer unless the model can handle ordinal encoding correctly.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="scaling">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Scaling</div>
+                <div class="sumdesc">scale() with standardization and min-max</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="codewrap">
+                <button class="copy" data-copy="c-scale">Copy</button>
+                <pre id="c-scale"><code># Standardize all numeric columns
+dt.scale("standard")
+
+# Min-max scale selected columns
+dt.scale("minmax", columns=["age", "salary"])</code></pre>
+              </div>
+
+              <div class="note">
+                Scaling affects only numeric columns. If a column has constant values (std=0), it is skipped safely.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="features">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Feature Engineering</div>
+                <div class="sumdesc">combineFeatures() using expressions on existing columns</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="codewrap">
+                <button class="copy" data-copy="c-feat">Copy</button>
+                <pre id="c-feat"><code>dt.combineFeatures("profit", "revenue - cost")
+dt.combineFeatures("bmi", "weight / (height ** 2)")
+dt.combineFeatures("full_name", "first + ' ' + last")</code></pre>
+              </div>
+
+              <div class="note">
+                Expressions are evaluated using pandas <code>DataFrame.eval(..., engine="python")</code>. If a column name is wrong, the method returns a clear error message.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="text">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Text Cleaning</div>
+                <div class="sumdesc">cleanText() for basic normalization</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="codewrap">
+                <button class="copy" data-copy="c-text">Copy</button>
+                <pre id="c-text"><code>dt.cleanText(
+    ["review_text"],
+    lower=True,
+    strip=True,
+    remove_punct=True,
+    remove_extra_spaces=True
+)</code></pre>
+              </div>
+
+              <div class="note">
+                This is intentionally simple. For advanced NLP, you can extend with stopwords, stemming, tokenization, or sklearn pipelines.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="types">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">Type Conversion</div>
+                <div class="sumdesc">to_int(), to_float(), to_string(), to_bool(), to_datetime(), to_category()</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="codewrap">
+                <button class="copy" data-copy="c-types">Copy</button>
+                <pre id="c-types"><code>dt.to_int("age")
+dt.to_float("price")
+dt.to_datetime("date")     # invalid values become NaT
+dt.to_category("city")</code></pre>
+              </div>
+
+              <div class="note warn">
+                Conversions can fail if values are not compatible (example: non-numeric strings to int). Convert/clean values first if needed.
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <div class="section" id="license">
+          <details>
+            <summary>
+              <div class="sumleft">
+                <div class="sumtitle">License and Author</div>
+                <div class="sumdesc">Educational and personal use; add a formal license if publishing publicly</div>
+              </div>
+              <div class="chev" aria-hidden="true">⌄</div>
+            </summary>
+
+            <div class="inner">
+              <div class="kvs">
+                <div class="kv">
+                  <b>Author</b>
+                  Ammar Yaser Al-Haroun (AI and Data Science Student)
+                </div>
+                <div class="kv">
+                  <b>License</b>
+                  This project is intended for educational and personal use. If you plan to publish it publicly, consider adding a formal license (MIT is a common simple option).
+                </div>
+              </div>
+
+              <footer>
+                Tip: Add this page to your repo under <code>docs/index.html</code>. GitHub will display it nicely if you enable Pages later.
+              </footer>
+            </div>
+          </details>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <div class="fab hidden" id="fab" aria-hidden="true">
+    <button class="btn" id="backTop" type="button" title="Back to top">Top</button>
+  </div>
+
+  <script>
+    (function(){
+      // Interactive glow follows cursor (subtle)
+      const glow = document.querySelector('.glow');
+      let gx = 30, gy = 25;
+      window.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth) * 100;
+        const y = (e.clientY / window.innerHeight) * 100;
+        gx = x; gy = y;
+        glow.style.setProperty('--gx', gx + '%');
+        glow.style.setProperty('--gy', gy + '%');
+      }, { passive:true });
+
+      // Theme toggle (persist)
+      const root = document.documentElement;
+      const btnTheme = document.getElementById('toggleTheme');
+      const saved = localStorage.getItem('du-theme');
+      if(saved){ root.setAttribute('data-theme', saved); }
+      btnTheme.addEventListener('click', () => {
+        const cur = root.getAttribute('data-theme') || 'dark';
+        const next = (cur === 'dark') ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('du-theme', next);
+      });
+
+      // Expand/collapse all
+      const allDetails = Array.from(document.querySelectorAll('details'));
+      document.getElementById('expandAll').addEventListener('click', () => allDetails.forEach(d => d.open = true));
+      document.getElementById('collapseAll').addEventListener('click', () => allDetails.forEach(d => d.open = false));
+
+      // Copy buttons
+      const copyButtons = Array.from(document.querySelectorAll('.copy'));
+      copyButtons.forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.getAttribute('data-copy');
+          const el = document.getElementById(id);
+          if(!el) return;
+          const text = el.innerText;
+          try{
+            await navigator.clipboard.writeText(text);
+            btn.classList.add('ok');
+            const old = btn.textContent;
+            btn.textContent = 'Copied';
+            setTimeout(() => { btn.classList.remove('ok'); btn.textContent = old; }, 900);
+          }catch(e){
+            // fallback
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btn.classList.add('ok');
+            const old = btn.textContent;
+            btn.textContent = 'Copied';
+            setTimeout(() => { btn.classList.remove('ok'); btn.textContent = old; }, 900);
+          }
+        });
+      });
+
+      // Tabs
+      function setupTabs(scope){
+        const tabs = Array.from(scope.querySelectorAll('.tab'));
+        if(!tabs.length) return;
+        tabs.forEach(t => t.addEventListener('click', () => {
+          const target = t.getAttribute('data-tab');
+          tabs.forEach(x => { x.classList.remove('active'); x.setAttribute('aria-selected','false'); });
+          t.classList.add('active'); t.setAttribute('aria-selected','true');
+
+          const panels = Array.from(scope.querySelectorAll('.tabpanel'));
+          panels.forEach(p => p.classList.toggle('active', p.id === target));
+        }));
+      }
+      document.querySelectorAll('.inner').forEach(setupTabs);
+
+      // Scrollspy for sidebar
+      const nav = document.getElementById('nav');
+      const links = Array.from(nav.querySelectorAll('a'));
+      const ids = links.map(a => a.getAttribute('href')).filter(Boolean);
+      const targets = ids.map(h => document.querySelector(h)).filter(Boolean);
+
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if(entry.isIntersecting){
+            const id = '#' + entry.target.id;
+            links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === id));
+          }
+        });
+      }, { rootMargin: '-35% 0px -55% 0px', threshold: 0.01 });
+
+      targets.forEach(t => obs.observe(t));
+
+      // Back to top visibility
+      const fab = document.getElementById('fab');
+      const backTop = document.getElementById('backTop');
+      const toggleFab = () => {
+        if(window.scrollY > 700) fab.classList.remove('hidden');
+        else fab.classList.add('hidden');
+      };
+      window.addEventListener('scroll', toggleFab, { passive:true });
+      toggleFab();
+      backTop.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+      // Search: filter sections + highlight matches
+      const search = document.getElementById('search');
+      const sections = [
+        ...document.querySelectorAll('details')
+      ];
+
+      // Store original HTML for restore
+      const originals = new Map();
+      sections.forEach(d => {
+        const inner = d.querySelector('.inner');
+        if(inner) originals.set(inner, inner.innerHTML);
+      });
+
+      function clearMarks(el){
+        el.querySelectorAll('mark').forEach(m => {
+          const text = document.createTextNode(m.textContent);
+          m.replaceWith(text);
+        });
+      }
+
+      function highlight(el, term){
+        if(!term) return;
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+        const nodes = [];
+        while(walker.nextNode()) nodes.push(walker.currentNode);
+
+        nodes.forEach(node => {
+          const value = node.nodeValue;
+          const idx = value.toLowerCase().indexOf(term.toLowerCase());
+          if(idx === -1) return;
+
+          const span = document.createElement('span');
+          const before = document.createTextNode(value.slice(0, idx));
+          const mark = document.createElement('mark');
+          mark.textContent = value.slice(idx, idx + term.length);
+          const after = document.createTextNode(value.slice(idx + term.length));
+          span.append(before, mark, after);
+          node.replaceWith(span);
+        });
+      }
+
+      function applySearch(q){
+        const term = q.trim();
+        sections.forEach(d => {
+          const inner = d.querySelector('.inner');
+          const title = d.querySelector('.sumtitle')?.textContent || '';
+          const desc  = d.querySelector('.sumdesc')?.textContent || '';
+          const hayTitle = (title + ' ' + desc).toLowerCase();
+
+          if(inner && originals.has(inner)){
+            inner.innerHTML = originals.get(inner);
+          }
+
+          if(!term){
+            d.style.display = '';
+            return;
+          }
+
+          const innerText = (d.textContent || '').toLowerCase();
+          const match = innerText.includes(term.toLowerCase()) || hayTitle.includes(term.toLowerCase());
+
+          d.style.display = match ? '' : 'none';
+
+          if(match){
+            d.open = true;
+            // highlight in visible section
+            const inner2 = d.querySelector('.inner');
+            if(inner2){
+              clearMarks(inner2);
+              highlight(inner2, term);
+            }
+          }
+        });
+      }
+
+      let t;
+      search.addEventListener('input', (e) => {
+        clearTimeout(t);
+        t = setTimeout(() => applySearch(e.target.value), 140);
+      });
+
+    })();
+  </script>
 </body>
 </html>
