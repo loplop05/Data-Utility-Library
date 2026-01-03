@@ -84,7 +84,7 @@ a:hover{ text-decoration:underline; }
   top:0;
   z-index: 60;
   border-bottom: 1px solid var(--line);
-  background: rgba(6,10,20,.55);
+  background: rgba(8,10,20,.55);
   backdrop-filter: var(--blur);
 }
 [data-theme="light"] .top{ background: rgba(247,250,255,.78); }
