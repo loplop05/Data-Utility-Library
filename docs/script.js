@@ -1,4 +1,6 @@
 (function () {
+  const body = document.body;
+
   // ---------- Theme toggle (persist) ----------
   const root = document.documentElement;
   const btnTheme = document.getElementById("toggleTheme");
@@ -104,6 +106,24 @@
 
   targets.forEach((t) => obs.observe(t));
 
+  // ---------- Mobile sidebar drawer ----------
+  const overlay = document.getElementById("overlay");
+  const btnOpenSide = document.getElementById("toggleSidebar");
+  const btnCloseSide = document.getElementById("closeSidebar");
+
+  const openSidebar = () => body.classList.add("sidebar-open");
+  const closeSidebar = () => body.classList.remove("sidebar-open");
+
+  if (btnOpenSide) btnOpenSide.addEventListener("click", () => {
+    if (body.classList.contains("sidebar-open")) closeSidebar();
+    else openSidebar();
+  });
+  if (btnCloseSide) btnCloseSide.addEventListener("click", closeSidebar);
+  if (overlay) overlay.addEventListener("click", closeSidebar);
+
+  // Close drawer when clicking a nav link (mobile)
+  links.forEach((a) => a.addEventListener("click", closeSidebar));
+
   // ---------- Back to top ----------
   const fab = document.getElementById("fab");
   const backTop = document.getElementById("backTop");
@@ -121,6 +141,7 @@
   const searchInput = document.getElementById("searchInput");
   const clearBtn = document.getElementById("clearSearch");
   const searchCount = document.getElementById("searchCount");
+  const suggestBox = document.getElementById("suggest");
 
   // Save original HTML for each inner (so we can restore after highlighting)
   const originals = new Map();
@@ -274,11 +295,15 @@
   searchInput.addEventListener("input", (e) => {
     clearTimeout(t);
     t = setTimeout(() => applySearch(e.target.value), 120);
+
+    // Suggestions
+    renderSuggestions(e.target.value);
   });
 
   clearBtn.addEventListener("click", () => {
     searchInput.value = "";
     applySearch("");
+    hideSuggestions();
     searchInput.focus();
   });
 
@@ -291,8 +316,101 @@
 
     // scroll to the section container
     firstVisible.scrollIntoView({ behavior: "smooth", block: "start" });
+    hideSuggestions();
+  });
+
+  // Keyboard shortcuts: / focus search, Esc clear/close
+  document.addEventListener("keydown", (e) => {
+    const isTyping = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+
+    if (!isTyping && e.key === "/") {
+      e.preventDefault();
+      searchInput.focus();
+      return;
+    }
+
+    if (e.key === "Escape") {
+      if (body.classList.contains("sidebar-open")) closeSidebar();
+      hideSuggestions();
+      if (document.activeElement === searchInput && searchInput.value) {
+        searchInput.value = "";
+        applySearch("");
+      }
+    }
   });
 
   // default state
   clearBtn.style.visibility = "hidden";
+
+  // ---------- Search suggestions (jump to sections) ----------
+  const navItems = links
+    .map((a) => {
+      const href = a.getAttribute("href") || "";
+      const id = href.startsWith("#") ? href.slice(1) : "";
+      const main = a.querySelector("span")?.textContent?.trim() || "";
+      const sub = a.querySelector(".hint")?.textContent?.trim() || "";
+      return { id, href, main, sub };
+    })
+    .filter((x) => x.id && x.main);
+
+  function hideSuggestions() {
+    if (!suggestBox) return;
+    suggestBox.classList.remove("show");
+    suggestBox.setAttribute("aria-hidden", "true");
+    suggestBox.innerHTML = "";
+  }
+
+  function renderSuggestions(q) {
+    if (!suggestBox) return;
+    const term = (q || "").trim().toLowerCase();
+    if (term.length < 2) return hideSuggestions();
+
+    const hits = navItems
+      .filter((x) => (x.main + " " + x.sub + " " + x.id).toLowerCase().includes(term))
+      .slice(0, 7);
+
+    if (!hits.length) return hideSuggestions();
+
+    suggestBox.innerHTML = hits
+      .map(
+        (x) =>
+          `<div class="sItem" role="option" data-href="${x.href}">
+             <div>
+               <div class="sMain">${escapeHtml(x.main)}</div>
+               <div class="sSub">${escapeHtml(x.sub)}</div>
+             </div>
+             <div class="sTag">#${escapeHtml(x.id)}</div>
+           </div>`
+      )
+      .join("");
+
+    suggestBox.classList.add("show");
+    suggestBox.setAttribute("aria-hidden", "false");
+
+    suggestBox.querySelectorAll(".sItem").forEach((el) => {
+      el.addEventListener("click", () => {
+        const href = el.getAttribute("data-href");
+        const target = href ? document.querySelector(href) : null;
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        hideSuggestions();
+        closeSidebar();
+      });
+    });
+  }
+
+  // click outside suggestions => hide
+  document.addEventListener("click", (e) => {
+    if (!suggestBox) return;
+    const inSearch = e.target && e.target.closest && e.target.closest(".search");
+    if (!inSearch) hideSuggestions();
+  });
+
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
 })();
