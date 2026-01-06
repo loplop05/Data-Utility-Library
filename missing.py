@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import base
 
 
 class MissingTools:
@@ -152,3 +153,41 @@ class MissingTools:
             new_df = self.df.drop_duplicates(subset=cols, keep=keep)
 
         return self._apply(new_df, inplace)
+
+    def missingColumns(self,threshold:float = 0.5):
+        """
+            Return columns where missing-value ratio >= threshold.
+
+            threshold:
+                float between 0 and 1
+                e.g. 0.4 => columns with 40% or more missing values
+            """
+        if not (0 <= threshold <= 1):
+            raise ValueError("threshold must be between 0 and 1.")
+
+        missing_ratio = self.df.isna().mean()
+        return missing_ratio[missing_ratio >= threshold].index.tolist()
+
+    def missingRows(self, threshold: float = 0.5, columns=None):
+        """
+        Return rows where missing-value ratio >= threshold.
+
+        threshold:
+            float between 0 and 1
+
+        columns:
+            None => consider all columns
+            str | list[str] => consider subset of columns only
+        """
+        if not (0 <= threshold <= 1):
+            raise ValueError("threshold must be between 0 and 1.")
+
+        if columns is None:
+            subset_df = self.df
+        else:
+            cols = self._ensure_list(columns)
+            self._require_columns(cols)
+            subset_df = self.df[cols]
+
+        missing_ratio = subset_df.isna().mean(axis=1)
+        return self.df.loc[missing_ratio >= threshold]
