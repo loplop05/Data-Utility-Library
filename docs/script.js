@@ -1,416 +1,459 @@
-(function () {
-  const body = document.body;
+/**
+ * DataUtility Documentation - JavaScript
+ * Handles all interactive functionality including search, navigation, and animations
+ */
 
-  // ---------- Theme toggle (persist) ----------
-  const root = document.documentElement;
-  const btnTheme = document.getElementById("toggleTheme");
-  const saved = localStorage.getItem("du-theme");
-  if (saved) root.setAttribute("data-theme", saved);
+// ============================================================================
+// Data
+// ============================================================================
 
-  btnTheme.addEventListener("click", () => {
-    const cur = root.getAttribute("data-theme") || "dark";
-    const next = cur === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
-    localStorage.setItem("du-theme", next);
-  });
-
-  // ---------- Expand / Collapse ----------
-  const allDetails = Array.from(document.querySelectorAll("details"));
-  document.getElementById("expandAll").addEventListener("click", () => {
-    allDetails.forEach((d) => (d.open = true));
-  });
-  document.getElementById("collapseAll").addEventListener("click", () => {
-    allDetails.forEach((d) => (d.open = false));
-  });
-
-  // ---------- Copy buttons ----------
-  const copyButtons = Array.from(document.querySelectorAll(".copy"));
-  copyButtons.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-copy");
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      const text = el.innerText;
-      const old = btn.textContent;
-
-      try {
-        await navigator.clipboard.writeText(text);
-        btn.classList.add("ok");
-        btn.textContent = "Copied";
-        setTimeout(() => {
-          btn.classList.remove("ok");
-          btn.textContent = old;
-        }, 900);
-      } catch {
-        // fallback
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("copy");
-        document.body.removeChild(ta);
-
-        btn.classList.add("ok");
-        btn.textContent = "Copied";
-        setTimeout(() => {
-          btn.classList.remove("ok");
-          btn.textContent = old;
-        }, 900);
-      }
-    });
-  });
-
-  // ---------- Tabs ----------
-  function setupTabs(scope) {
-    const tabs = Array.from(scope.querySelectorAll(".tab"));
-    if (!tabs.length) return;
-
-    tabs.forEach((t) =>
-      t.addEventListener("click", () => {
-        const target = t.getAttribute("data-tab");
-        tabs.forEach((x) => {
-          x.classList.remove("active");
-          x.setAttribute("aria-selected", "false");
-        });
-        t.classList.add("active");
-        t.setAttribute("aria-selected", "true");
-
-        const panels = Array.from(scope.querySelectorAll(".tabpanel"));
-        panels.forEach((p) => p.classList.toggle("active", p.id === target));
-      })
-    );
-  }
-  document.querySelectorAll(".inner").forEach(setupTabs);
-
-  // ---------- Scrollspy ----------
-  const nav = document.getElementById("nav");
-  const links = Array.from(nav.querySelectorAll("a"));
-  const targets = links
-    .map((a) => document.querySelector(a.getAttribute("href")))
-    .filter(Boolean);
-
-  const obs = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const id = "#" + entry.target.id;
-          links.forEach((a) =>
-            a.classList.toggle("active", a.getAttribute("href") === id)
-          );
-        }
-      });
+const sections = [
+    {
+        id: 'overview',
+        title: 'Overview',
+        description: 'What DataUtility is and why it exists',
+        tags: ['intro', 'overview'],
+        content: 'DataUtility is a lightweight, modular Python utility library built on top of pandas to simplify data cleaning, exploration (EDA), and preprocessing. You use one class: DataTools. Internally, methods are organized into modules.',
+        subsections: [
+            {
+                title: 'Why this library exists',
+                content: 'Most projects repeat the same tasks: inspect datasets, handle missing values, remove duplicates, detect outliers, encode categories, scale numeric features, and create derived features. DataUtility keeps these steps consistent and reusable.'
+            },
+            {
+                title: 'What "safe" means here',
+                content: 'Methods validate columns and types, avoid silent behavior, and support inplace=True/False so you choose between modifying dt.df or returning a copy.'
+            }
+        ]
     },
-    { rootMargin: "-35% 0px -55% 0px", threshold: 0.01 }
-  );
+    {
+        id: 'quickstart',
+        title: 'Quick Start',
+        description: 'Install requirements and create your first DataTools instance',
+        tags: ['install', 'import', 'quickstart'],
+        content: 'Get started with DataUtility in just a few steps. Install pandas and numpy, then import DataTools and create your first instance.',
+        subsections: [
+            {
+                title: '1) Install',
+                content: 'pip install pandas numpy',
+                isCode: true
+            },
+            {
+                title: '2) Import + create DataTools',
+                content: `import pandas as pd
+from data_utility import DataTools
 
-  targets.forEach((t) => obs.observe(t));
+df = pd.read_csv("data.csv")
+dt = DataTools(df)`,
+                isCode: true
+            }
+        ]
+    },
+    {
+        id: 'structure',
+        title: 'Project Structure',
+        description: 'Modular files combined into one DataTools class',
+        tags: ['structure', 'modules', 'package'],
+        content: 'The DataUtility package is organized into focused modules, each handling a specific aspect of data processing. All modules are unified through the main DataTools class.'
+    },
+    {
+        id: 'design',
+        title: 'Design Principles',
+        description: 'Consistency rules used across every method',
+        tags: ['design', 'principles', 'validation'],
+        content: 'DataUtility follows strict design principles to ensure predictable, safe behavior across all methods.'
+    },
+    {
+        id: 'missing',
+        title: 'Missing and Duplicates',
+        description: 'Fill or drop missing values and duplicates',
+        tags: ['missing', 'duplicates', 'cleaning'],
+        content: 'Handle missing values and duplicate rows with flexible, safe methods that give you control over the operation.'
+    },
+    {
+        id: 'outliers',
+        title: 'Outliers',
+        description: 'Detect and handle outliers using IQR and Z-score',
+        tags: ['outliers', 'detection', 'iqr', 'zscore'],
+        content: 'Identify and manage outliers in your data using industry-standard statistical methods.'
+    },
+    {
+        id: 'encoding',
+        title: 'Encoding',
+        description: 'Categorical encoding with oneHotEncode()',
+        tags: ['encoding', 'categorical', 'onehot'],
+        content: 'Convert categorical variables into numeric representations suitable for machine learning models.'
+    },
+    {
+        id: 'scaling',
+        title: 'Scaling',
+        description: 'Normalize and scale numeric features',
+        tags: ['scaling', 'normalization', 'standardization'],
+        content: 'Scale numeric features to a standard range for improved model performance.'
+    },
+    {
+        id: 'features',
+        title: 'Feature Engineering',
+        description: 'Create derived features with combineFeatures()',
+        tags: ['features', 'engineering', 'derivation'],
+        content: 'Generate new features from existing ones to improve model predictive power.'
+    },
+    {
+        id: 'text',
+        title: 'Text Cleaning',
+        description: 'Clean and preprocess text data',
+        tags: ['text', 'cleaning', 'preprocessing'],
+        content: 'Prepare text data for analysis with comprehensive cleaning utilities.'
+    },
+    {
+        id: 'types',
+        title: 'Type Conversion',
+        description: 'Convert between data types safely',
+        tags: ['types', 'conversion', 'datetime'],
+        content: 'Transform data types with validation and error handling.'
+    },
+    {
+        id: 'license',
+        title: 'License and Author',
+        description: 'Educational and personal use',
+        tags: ['license', 'author'],
+        content: 'DataUtility is available for educational and personal use. Author: Ammar Yaser Al-Haroun (AI and Data Science Student).'
+    }
+];
 
-  // ---------- Mobile sidebar drawer ----------
-  const overlay = document.getElementById("overlay");
-  const btnOpenSide = document.getElementById("toggleSidebar");
-  const btnCloseSide = document.getElementById("closeSidebar");
+// ============================================================================
+// DOM Elements
+// ============================================================================
 
-  const openSidebar = () => body.classList.add("sidebar-open");
-  const closeSidebar = () => body.classList.remove("sidebar-open");
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+const closeSidebar = document.getElementById('closeSidebar');
+const searchInput = document.getElementById('searchInput');
+const clearSearch = document.getElementById('clearSearch');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+const expandBtn = document.getElementById('expandBtn');
+const collapseBtn = document.getElementById('collapseBtn');
+const sectionsContainer = document.getElementById('sectionsContainer');
+const navMenu = document.getElementById('navMenu');
+const tagsContainer = document.getElementById('tagsContainer');
+const fab = document.getElementById('fab');
+const emptyState = document.getElementById('emptyState');
+const emptyStateText = document.getElementById('emptyStateText');
 
-  if (btnOpenSide) btnOpenSide.addEventListener("click", () => {
-    if (body.classList.contains("sidebar-open")) closeSidebar();
-    else openSidebar();
-  });
-  if (btnCloseSide) btnCloseSide.addEventListener("click", closeSidebar);
-  if (overlay) overlay.addEventListener("click", closeSidebar);
+// ============================================================================
+// State
+// ============================================================================
 
-  // Close drawer when clicking a nav link (mobile)
-  links.forEach((a) => a.addEventListener("click", closeSidebar));
+let expandedSections = new Set(['overview']);
+let filteredSections = [...sections];
+let currentSearchQuery = '';
 
-  // ---------- Back to top ----------
-  const fab = document.getElementById("fab");
-  const backTop = document.getElementById("backTop");
-  const toggleFab = () => {
-    if (window.scrollY > 700) fab.classList.remove("hidden");
-    else fab.classList.add("hidden");
-  };
-  window.addEventListener("scroll", toggleFab, { passive: true });
-  toggleFab();
-  backTop.addEventListener("click", () =>
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  );
+// ============================================================================
+// Initialization
+// ============================================================================
 
-  // ---------- Search (friendly) ----------
-  const searchInput = document.getElementById("searchInput");
-  const clearBtn = document.getElementById("clearSearch");
-  const searchCount = document.getElementById("searchCount");
-  const suggestBox = document.getElementById("suggest");
+document.addEventListener('DOMContentLoaded', () => {
+    renderNavigation();
+    renderTags();
+    renderSections();
+    setupEventListeners();
+});
 
-  // Save original HTML for each inner (so we can restore after highlighting)
-  const originals = new Map();
-  allDetails.forEach((d) => {
-    const inner = d.querySelector(".inner");
-    if (inner) originals.set(inner, inner.innerHTML);
-  });
+// ============================================================================
+// Event Listeners
+// ============================================================================
 
-  function escapeRegExp(str) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  }
+function setupEventListeners() {
+    // Menu toggle
+    menuToggle.addEventListener('click', toggleSidebar);
+    closeSidebar.addEventListener('click', closeSidebarMenu);
+    overlay.addEventListener('click', closeSidebarMenu);
 
-  // highlight ALL matches inside an element (text nodes only)
-  function highlightAll(rootEl, term) {
-    if (!term) return;
+    // Search
+    searchInput.addEventListener('input', handleSearch);
+    clearSearch.addEventListener('click', clearSearchInput);
+    clearSearchBtn.addEventListener('click', clearSearchInput);
 
-    const safe = escapeRegExp(term);
-    const re = new RegExp(safe, "gi");
+    // Expand/Collapse
+    expandBtn.addEventListener('click', expandAll);
+    collapseBtn.addEventListener('click', collapseAll);
 
-    const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, null);
-    const nodes = [];
-    while (walker.nextNode()) nodes.push(walker.currentNode);
+    // FAB
+    fab.addEventListener('click', scrollToTop);
+    window.addEventListener('scroll', handleScroll);
 
-    nodes.forEach((node) => {
-      const value = node.nodeValue;
-      if (!value) return;
-      if (!re.test(value)) return;
-
-      // reset regex state for safety
-      re.lastIndex = 0;
-
-      const frag = document.createDocumentFragment();
-      let last = 0;
-      let match;
-
-      while ((match = re.exec(value)) !== null) {
-        const start = match.index;
-        const end = start + match[0].length;
-
-        if (start > last) frag.appendChild(document.createTextNode(value.slice(last, start)));
-
-        const mark = document.createElement("mark");
-        mark.className = "hit";
-        mark.textContent = value.slice(start, end);
-        frag.appendChild(mark);
-
-        last = end;
-      }
-
-      if (last < value.length) frag.appendChild(document.createTextNode(value.slice(last)));
-
-      node.parentNode.replaceChild(frag, node);
-    });
-  }
-
-  function restoreInner(detailsEl) {
-    const inner = detailsEl.querySelector(".inner");
-    if (!inner) return;
-    if (!originals.has(inner)) return;
-    inner.innerHTML = originals.get(inner);
-    // rebind tabs + copy in restored html (simple + not complicated)
-    setupTabs(inner);
-    inner.querySelectorAll(".copy").forEach((btn) => {
-      // avoid double-binding: mark when bound
-      if (btn.dataset.bound === "1") return;
-      btn.dataset.bound = "1";
-      btn.addEventListener("click", async () => {
-        const id = btn.getAttribute("data-copy");
-        const el = document.getElementById(id);
-        if (!el) return;
-        const text = el.innerText;
-        const old = btn.textContent;
-        try {
-          await navigator.clipboard.writeText(text);
-          btn.classList.add("ok");
-          btn.textContent = "Copied";
-          setTimeout(() => {
-            btn.classList.remove("ok");
-            btn.textContent = old;
-          }, 900);
-        } catch {
-          const ta = document.createElement("textarea");
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-          btn.classList.add("ok");
-          btn.textContent = "Copied";
-          setTimeout(() => {
-            btn.classList.remove("ok");
-            btn.textContent = old;
-          }, 900);
+    // Navigation items
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.nav-item')) {
+            const navItem = e.target.closest('.nav-item');
+            const sectionId = navItem.dataset.sectionId;
+            const section = sections.find(s => s.id === sectionId);
+            if (section) {
+                expandedSections.add(sectionId);
+                renderSections();
+                closeSidebarMenu();
+                setTimeout(() => {
+                    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
         }
-      });
-    });
-  }
-
-  function sectionMatches(detailsEl, termLower) {
-    const title = (detailsEl.querySelector(".sumtitle")?.textContent || "").toLowerCase();
-    const desc = (detailsEl.querySelector(".sumdesc")?.textContent || "").toLowerCase();
-    const tags = (detailsEl.getAttribute("data-search-tags") || "").toLowerCase();
-    const body = (detailsEl.textContent || "").toLowerCase();
-
-    return (
-      title.includes(termLower) ||
-      desc.includes(termLower) ||
-      tags.includes(termLower) ||
-      body.includes(termLower)
-    );
-  }
-
-  function applySearch(q) {
-    const term = q.trim();
-    const termLower = term.toLowerCase();
-
-    let visibleCount = 0;
-
-    allDetails.forEach((d) => {
-      // restore first (removes old highlights)
-      restoreInner(d);
-
-      if (!term) {
-        d.style.display = "";
-        return;
-      }
-
-      const match = sectionMatches(d, termLower);
-      d.style.display = match ? "" : "none";
-
-      if (match) {
-        visibleCount++;
-        d.open = true;
-
-        const inner = d.querySelector(".inner");
-        if (inner) highlightAll(inner, term);
-      }
     });
 
-    if (!term) {
-      searchCount.textContent = "Showing all sections";
-      clearBtn.style.visibility = "hidden";
+    // Section headers
+    document.addEventListener('click', (e) => {
+        const sectionHeader = e.target.closest('.section-header');
+        if (sectionHeader) {
+            const section = sectionHeader.closest('.section');
+            const sectionId = section.dataset.sectionId;
+            toggleSection(sectionId);
+        }
+    });
+
+    // Tags
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.tag-item')) {
+            const tag = e.target.closest('.tag-item').textContent.trim();
+            searchInput.value = tag;
+            handleSearch();
+        }
+    });
+
+    // Tag buttons in sidebar
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.tag')) {
+            const tag = e.target.closest('.tag').textContent.trim();
+            searchInput.value = tag;
+            handleSearch();
+            closeSidebarMenu();
+        }
+    });
+}
+
+// ============================================================================
+// Sidebar Functions
+// ============================================================================
+
+function toggleSidebar() {
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    menuToggle.classList.toggle('active');
+}
+
+function closeSidebarMenu() {
+    sidebar.classList.remove('active');
+    overlay.classList.remove('active');
+    menuToggle.classList.remove('active');
+}
+
+// ============================================================================
+// Search Functions
+// ============================================================================
+
+function handleSearch() {
+    const query = searchInput.value.toLowerCase().trim();
+    currentSearchQuery = query;
+
+    if (!query) {
+        filteredSections = [...sections];
+        expandedSections = new Set(['overview']);
     } else {
-      searchCount.textContent =
-        visibleCount === 1 ? "1 matching section" : `${visibleCount} matching sections`;
-      clearBtn.style.visibility = "visible";
+        filteredSections = sections.filter(section =>
+            section.title.toLowerCase().includes(query) ||
+            section.description.toLowerCase().includes(query) ||
+            section.tags.some(tag => tag.toLowerCase().includes(query)) ||
+            section.content.toLowerCase().includes(query)
+        );
+
+        // Auto-expand matching sections
+        expandedSections = new Set(filteredSections.map(s => s.id));
     }
-  }
 
-  let t;
-  searchInput.addEventListener("input", (e) => {
-    clearTimeout(t);
-    t = setTimeout(() => applySearch(e.target.value), 120);
+    // Update clear button visibility
+    clearSearch.classList.toggle('visible', query.length > 0);
 
-    // Suggestions
-    renderSuggestions(e.target.value);
-  });
+    renderSections();
+}
 
-  clearBtn.addEventListener("click", () => {
-    searchInput.value = "";
-    applySearch("");
-    hideSuggestions();
+function clearSearchInput() {
+    searchInput.value = '';
+    currentSearchQuery = '';
+    clearSearch.classList.remove('visible');
+    filteredSections = [...sections];
+    expandedSections = new Set(['overview']);
+    renderSections();
     searchInput.focus();
-  });
+}
 
-  // Enter = jump to first visible match (friendly)
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter") return;
+// ============================================================================
+// Section Functions
+// ============================================================================
 
-    const firstVisible = allDetails.find((d) => d.style.display !== "none");
-    if (!firstVisible) return;
+function toggleSection(sectionId) {
+    if (expandedSections.has(sectionId)) {
+        expandedSections.delete(sectionId);
+    } else {
+        expandedSections.add(sectionId);
+    }
+    renderSections();
+}
 
-    // scroll to the section container
-    firstVisible.scrollIntoView({ behavior: "smooth", block: "start" });
-    hideSuggestions();
-  });
+function expandAll() {
+    expandedSections = new Set(filteredSections.map(s => s.id));
+    renderSections();
+}
 
-  // Keyboard shortcuts: / focus search, Esc clear/close
-  document.addEventListener("keydown", (e) => {
-    const isTyping = ["INPUT", "TEXTAREA"].includes(document.activeElement?.tagName);
+function collapseAll() {
+    expandedSections.clear();
+    renderSections();
+}
 
-    if (!isTyping && e.key === "/") {
-      e.preventDefault();
-      searchInput.focus();
-      return;
+// ============================================================================
+// Rendering Functions
+// ============================================================================
+
+function renderNavigation() {
+    navMenu.innerHTML = sections.map(section => `
+        <div class="nav-item ${expandedSections.has(section.id) ? 'active' : ''}" data-section-id="${section.id}">
+            <div class="nav-item-title">${section.title}</div>
+            <div class="nav-item-desc">${section.description}</div>
+        </div>
+    `).join('');
+}
+
+function renderTags() {
+    const allTags = [...new Set(sections.flatMap(s => s.tags))];
+    tagsContainer.innerHTML = allTags.map(tag => `
+        <button class="tag">${tag}</button>
+    `).join('');
+}
+
+function renderSections() {
+    if (filteredSections.length === 0) {
+        sectionsContainer.innerHTML = '';
+        emptyState.style.display = 'block';
+        emptyStateText.textContent = `No sections found matching "${currentSearchQuery}"`;
+        return;
     }
 
-    if (e.key === "Escape") {
-      if (body.classList.contains("sidebar-open")) closeSidebar();
-      hideSuggestions();
-      if (document.activeElement === searchInput && searchInput.value) {
-        searchInput.value = "";
-        applySearch("");
-      }
-    }
-  });
+    emptyState.style.display = 'none';
 
-  // default state
-  clearBtn.style.visibility = "hidden";
+    sectionsContainer.innerHTML = filteredSections.map(section => `
+        <div class="section ${expandedSections.has(section.id) ? 'expanded' : ''}" data-section-id="${section.id}">
+            <div class="section-header">
+                <div class="section-title-group">
+                    <div class="section-title">${section.title}</div>
+                    <div class="section-desc">${section.description}</div>
+                </div>
+                <div class="section-chevron">⌄</div>
+            </div>
 
-  // ---------- Search suggestions (jump to sections) ----------
-  const navItems = links
-    .map((a) => {
-      const href = a.getAttribute("href") || "";
-      const id = href.startsWith("#") ? href.slice(1) : "";
-      const main = a.querySelector("span")?.textContent?.trim() || "";
-      const sub = a.querySelector(".hint")?.textContent?.trim() || "";
-      return { id, href, main, sub };
-    })
-    .filter((x) => x.id && x.main);
+            <div class="section-content">
+                <div class="section-body">
+                    <p>${section.content}</p>
 
-  function hideSuggestions() {
-    if (!suggestBox) return;
-    suggestBox.classList.remove("show");
-    suggestBox.setAttribute("aria-hidden", "true");
-    suggestBox.innerHTML = "";
-  }
+                    ${section.subsections ? `
+                        <div class="subsections">
+                            ${section.subsections.map(sub => `
+                                <div class="section-subsection">
+                                    <div class="subsection-title">${sub.title}</div>
+                                    <div class="subsection-content">
+                                        ${sub.isCode ? `<pre class="code-block"><code>${escapeHtml(sub.content)}</code></pre>` : sub.content}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    ` : ''}
 
-  function renderSuggestions(q) {
-    if (!suggestBox) return;
-    const term = (q || "").trim().toLowerCase();
-    if (term.length < 2) return hideSuggestions();
+                    <div class="tags">
+                        ${section.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
 
-    const hits = navItems
-      .filter((x) => (x.main + " " + x.sub + " " + x.id).toLowerCase().includes(term))
-      .slice(0, 7);
-
-    if (!hits.length) return hideSuggestions();
-
-    suggestBox.innerHTML = hits
-      .map(
-        (x) =>
-          `<div class="sItem" role="option" data-href="${x.href}">
-             <div>
-               <div class="sMain">${escapeHtml(x.main)}</div>
-               <div class="sSub">${escapeHtml(x.sub)}</div>
-             </div>
-             <div class="sTag">#${escapeHtml(x.id)}</div>
-           </div>`
-      )
-      .join("");
-
-    suggestBox.classList.add("show");
-    suggestBox.setAttribute("aria-hidden", "false");
-
-    suggestBox.querySelectorAll(".sItem").forEach((el) => {
-      el.addEventListener("click", () => {
-        const href = el.getAttribute("data-href");
-        const target = href ? document.querySelector(href) : null;
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
-        hideSuggestions();
-        closeSidebar();
-      });
+    // Update navigation active state
+    document.querySelectorAll('.nav-item').forEach(item => {
+        const sectionId = item.dataset.sectionId;
+        item.classList.toggle('active', expandedSections.has(sectionId));
     });
-  }
+}
 
-  // click outside suggestions => hide
-  document.addEventListener("click", (e) => {
-    if (!suggestBox) return;
-    const inSearch = e.target && e.target.closest && e.target.closest(".search");
-    if (!inSearch) hideSuggestions();
-  });
+// ============================================================================
+// Scroll Functions
+// ============================================================================
 
-  function escapeHtml(str) {
-    return String(str)
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-})();
+function handleScroll() {
+    const scrollPosition = window.scrollY;
+
+    // Show/hide FAB
+    if (scrollPosition > 300) {
+        fab.classList.add('show');
+    } else {
+        fab.classList.remove('show');
+    }
+
+    // Update active navigation based on scroll
+    updateActiveNavigation();
+}
+
+function updateActiveNavigation() {
+    const scrollPosition = window.scrollY + 100;
+
+    sections.forEach(section => {
+        const element = document.getElementById(section.id);
+        if (element) {
+            const elementTop = element.offsetTop;
+            const elementBottom = elementTop + element.offsetHeight;
+
+            if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                const navItem = document.querySelector(`[data-section-id="${section.id}"]`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+            }
+        }
+    });
+}
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// ============================================================================
+// Utility Functions
+// ============================================================================
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+// ============================================================================
+// Keyboard Shortcuts
+// ============================================================================
+
+document.addEventListener('keydown', (e) => {
+    // Ctrl/Cmd + K to focus search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+    }
+
+    // Escape to close sidebar
+    if (e.key === 'Escape') {
+        closeSidebarMenu();
+    }
+});

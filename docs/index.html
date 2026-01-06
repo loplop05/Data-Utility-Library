@@ -1,792 +1,129 @@
-<!doctype html>
-<html lang="en" data-theme="dark">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DataUtility Documentation</title>
-  <meta name="description" content="DataUtility: modular pandas toolkit for data cleaning, EDA, outliers, encoding, scaling, feature engineering, text cleaning, and type conversions." />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="DataUtility: modular pandas toolkit for data cleaning, EDA, outliers, encoding, scaling, feature engineering, text cleaning, and type conversions.">
+    <title>DataUtility Documentation</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <header class="top">
-    <div class="wrap topbar">
-      <div class="brand" role="banner">
-        <div class="logo" aria-hidden="true"></div>
-        <div class="brandText">
-          <h1>DataUtility Documentation</h1>
-          <p>Modular pandas toolkit for cleaning, EDA, outliers, encoding, scaling, and feature engineering</p>
-        </div>
-      </div>
-
-      <div class="actions" role="navigation" aria-label="Top actions">
-        <button class="btn ghost mobileOnly" id="toggleSidebar" type="button" aria-label="Toggle sidebar" title="Menu">☰</button>
-
-        <div class="search" role="search" aria-label="Search documentation">
-          <span class="searchLabel" aria-hidden="true">Search</span>
-
-          <input id="searchInput" type="search"
-                 placeholder="Type: method name (fillMissingValues), topic (outliers), or keyword..."
-                 autocomplete="off"
-                 aria-label="Search input" />
-
-          <button id="clearSearch" class="iconBtn" type="button" aria-label="Clear search" title="Clear">✕</button>
-
-          <div class="suggest" id="suggest" role="listbox" aria-label="Search suggestions" aria-hidden="true"></div>
-        </div>
-
-        <div class="searchMeta" aria-live="polite">
-          <span id="searchCount">Showing all sections</span>
-        </div>
-
-        <button class="btn" id="toggleTheme" type="button" title="Toggle theme">Theme</button>
-        <button class="btn primary" id="expandAll" type="button" title="Expand all sections">Expand</button>
-        <button class="btn" id="collapseAll" type="button" title="Collapse all sections">Collapse</button>
-      </div>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <div class="layout">
-
-      <div class="overlay" id="overlay" aria-hidden="true"></div>
-
-      <aside class="sidebar" aria-label="Sidebar navigation">
-        <div class="panel side">
-          <div class="sideTop">
-            <h2>Contents</h2>
-            <button class="iconBtn mobileOnly" id="closeSidebar" type="button" aria-label="Close sidebar" title="Close">✕</button>
-          </div>
-
-
-          <div class="nav" id="nav">
-            <a href="#overview"><span>Overview</span><span class="hint">What it is</span></a>
-            <a href="#quickstart"><span>Quick Start</span><span class="hint">Install + import</span></a>
-            <a href="#structure"><span>Project Structure</span><span class="hint">Modules</span></a>
-            <a href="#design"><span>Design Principles</span><span class="hint">Rules</span></a>
-
-            <a href="#howto"><span>How to Use</span><span class="hint">Workflow</span></a>
-            <a href="#searchhelp"><span>Search Guide</span><span class="hint">Tips</span></a>
-
-            <a href="#inspection"><span>Inspection and EDA</span><span class="hint">overview(), insights()</span></a>
-            <a href="#missing"><span>Missing and Duplicates</span><span class="hint">fill / drop</span></a>
-            <a href="#outliers"><span>Outliers</span><span class="hint">IQR + Z-score</span></a>
-            <a href="#encoding"><span>Encoding</span><span class="hint">oneHotEncode()</span></a>
-            <a href="#scaling"><span>Scaling</span><span class="hint">scale()</span></a>
-            <a href="#features"><span>Feature Engineering</span><span class="hint">combineFeatures()</span></a>
-            <a href="#text"><span>Text Cleaning</span><span class="hint">cleanText()</span></a>
-            <a href="#types"><span>Type Conversion</span><span class="hint">to_datetime()</span></a>
-            <a href="#license"><span>License</span><span class="hint">Use</span></a>
-          </div>
-
-          <div class="chips" aria-label="Tags">
-            <div class="chip">DataTools</div>
-            <div class="chip">inplace</div>
-            <div class="chip">validation</div>
-            <div class="chip">modular</div>
-            <div class="chip">student-friendly</div>
-          </div>
-
-          <div class="miniNote">
-            <b>Quick tips</b>
-            <ul>
-              <li>Search supports <span class="kbd">Enter</span> to jump to first match.</li>
-              <li>Use method names like <code>fillMissingValues</code> or keywords like <code>outliers</code>.</li>
-              <li>Matches auto-expand and highlight.</li>
-            </ul>
-          </div>
-        </div>
-      </aside>
-
-      <section class="content" aria-label="Documentation content">
-
-        <div class="hero" id="overview">
-          <div class="heroHead">
-            <h2>Overview</h2>
-            <div class="pill">Tech Docs • Clear • Reusable</div>
-          </div>
-
-          <p>
-            <b>DataUtility</b> is a lightweight, modular Python utility library built on top of <b>pandas</b>
-            to simplify <b>data cleaning, exploration (EDA), and preprocessing</b>.
-            You use one class: <code>DataTools</code>. Internally, methods are organized into modules.
-          </p>
-
-          <div class="grid">
-            <div class="card">
-              <h3>Why this library exists</h3>
-              <p>
-                Most projects repeat the same tasks: inspect datasets, handle missing values, remove duplicates,
-                detect outliers, encode categories, scale numeric features, and create derived features.
-                DataUtility keeps these steps <b>consistent and reusable</b>.
-              </p>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-section">
+                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="logo">
+                    <div class="logo-icon">D</div>
+                    <div class="logo-text">
+                        <h1>DataUtility</h1>
+                        <p>Documentation</p>
+                    </div>
+                </div>
             </div>
-            <div class="card">
-              <h3>What “safe” means here</h3>
-              <p>
-                Methods validate columns and types, avoid silent behavior, and support
-                <code>inplace=True/False</code> so you choose between modifying <code>dt.df</code> or returning a copy.
-              </p>
+
+            <div class="search-container">
+                <input 
+                    type="search" 
+                    id="searchInput" 
+                    class="search-input" 
+                    placeholder="Search documentation..."
+                    aria-label="Search documentation"
+                >
+                <button class="search-clear" id="clearSearch" aria-label="Clear search">✕</button>
             </div>
-          </div>
-        </div>
 
-        <!-- QUICK START -->
-        <div class="section" id="quickstart">
-          <details open data-search-tags="install import quickstart pandas numpy DataTools">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Quick Start</div>
-                <div class="sumdesc">Install requirements and create your first DataTools instance</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="note good">
-                Put these files inside <code>docs/</code> (example: <code>docs/index.html</code>).
-                Open <code>index.html</code> in your browser.
-              </div>
-
-              <div class="kvs">
-                <div class="kv">
-                  <b>1) Install</b>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-req">Copy</button>
-                    <pre id="c-req"><code>pip install pandas numpy</code></pre>
-                  </div>
-                </div>
-
-                <div class="kv">
-                  <b>2) Import + create DataTools</b>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-import">Copy</button>
-                    <pre id="c-import"><code>import pandas as pd
-from data_utility import DataTools
-
-df = pd.read_csv("data.csv")
-dt = DataTools(df)</code></pre>
-                  </div>
-                  <div class="note warn">
-                    If you use a package structure, export <code>DataTools</code> from <code>data_utility/__init__.py</code>.
-                  </div>
-                </div>
-              </div>
-
-              <div class="note">
-                <b>Common workflow:</b> <code>overview()</code> → fix missing/duplicates → outliers → encoding → scaling → features.
-              </div>
+            <div class="header-actions">
+                <button class="btn btn-outline" id="expandBtn">Expand</button>
+                <button class="btn btn-outline" id="collapseBtn">Collapse</button>
             </div>
-          </details>
         </div>
+    </header>
 
-        <!-- STRUCTURE -->
-        <div class="section" id="structure">
-          <details data-search-tags="structure modules package init base eda missing outliers encoding scaling features text types">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Project Structure</div>
-                <div class="sumdesc">Modular files combined into one DataTools class</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
+    <!-- Overlay for mobile sidebar -->
+    <div class="overlay" id="overlay"></div>
 
-            <div class="inner">
-              <div class="codewrap">
-                <button class="copy" data-copy="c-structure">Copy</button>
-                <pre id="c-structure"><code>data_utility/
-├── __init__.py
-├── data_tools.py        # main public interface (DataTools)
-│
-├── base.py              # shared helpers and validation
-├── io_tools.py          # data loading utilities (optional)
-├── eda.py               # inspection and overview
-├── missing.py           # missing values and duplicates
-├── outliers.py          # IQR and Z-score logic
-├── encoding.py          # encoding helpers
-├── scaling.py           # scaling utilities
-├── features.py          # feature engineering
-├── text_cleaning.py     # text preprocessing
-└── types.py             # dtype transformations</code></pre>
-              </div>
-
-              <div class="note">
-                <b>Implementation idea:</b> your <code>DataTools</code> class imports and “mixes” feature modules.
-                That keeps your code organized while usage stays simple.
-              </div>
-
-              <div class="kvs">
-                <div class="kv">
-                  <b>How modules connect</b>
-                  <p>
-                    Most functions operate on <code>self.df</code>. Validation helpers live in <code>BaseTools</code>
-                    so every module can reuse the same checks.
-                  </p>
-                </div>
-              </div>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-header">
+                <h2>Contents</h2>
+                <button class="close-btn" id="closeSidebar" aria-label="Close sidebar">✕</button>
             </div>
-          </details>
-        </div>
 
-        <!-- DESIGN -->
-        <div class="section" id="design">
-          <details data-search-tags="design principles inplace validation predictable output errors">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Design Principles</div>
-                <div class="sumdesc">Consistency rules used across every method</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
+            <nav class="nav-menu" id="navMenu"></nav>
 
-            <div class="inner">
-              <div class="kvs">
-                <div class="kv">
-                  <b>Single entry point</b>
-                  Use <code>DataTools</code> as the only class you instantiate.
-                </div>
-                <div class="kv">
-                  <b>All methods operate on self.df</b>
-                  Internal modules assume <code>self.df</code> exists and is a pandas DataFrame.
-                </div>
-                <div class="kv">
-                  <b>inplace=True / False is respected</b>
-                  If <code>inplace=True</code>, update <code>dt.df</code>. If false, return a new DataFrame.
-                </div>
-                <div class="kv">
-                  <b>Validation everywhere</b>
-                  Clear errors for missing columns, wrong dtype, or unsupported strategy names.
-                </div>
-                <div class="kv">
-                  <b>Predictable output</b>
-                  Return DataFrame / Series / (df, mapping) exactly as documented—no surprises.
-                </div>
-              </div>
+            <div class="tags-section">
+                <h3>Tags</h3>
+                <div class="tags-container" id="tagsContainer"></div>
             </div>
-          </details>
-        </div>
 
-        <!-- HOW TO USE -->
-        <div class="section" id="howto">
-          <details open data-search-tags="how to use workflow steps pipeline cleaning preprocessing eda">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">How to Use DataTools (Recommended Workflow)</div>
-                <div class="sumdesc">When to use each group of methods + a simple real workflow</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="note good">
-                Think of DataUtility like a <b>preprocessing toolbox</b>. You don’t use everything every time.
-                You pick what your dataset needs.
-              </div>
-
-              <div class="kvs">
-                <div class="kv">
-                  <b>Step 1 — Inspect first (always)</b>
-                  <p>
-                    Use <code>overview()</code>, <code>head()</code>, <code>tail()</code>, <code>insights()</code>,
-                    and <code>missingReport()</code> to understand shape, columns, nulls, and basic stats.
-                  </p>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-flow1">Copy</button>
-                    <pre id="c-flow1"><code>summary, info = dt.overview()
-print(summary)
-print(info)
-dt.missingReport()</code></pre>
-                  </div>
-                </div>
-
-                <div class="kv">
-                  <b>Step 2 — Fix missing values + duplicates</b>
-                  <p>
-                    If missing values are small: fill them. If a column is mostly missing: consider dropping.
-                    Use duplicates removal when repeated rows exist (common in merged datasets).
-                  </p>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-flow2">Copy</button>
-                    <pre id="c-flow2"><code>dt.fillMissingValues("median", columns=["age"])
-dt.dropDuplicates(columns=["email"], keep="first")</code></pre>
-                  </div>
-                </div>
-
-                <div class="kv">
-                  <b>Step 3 — Handle outliers (only if needed)</b>
-                  <p>
-                    Use outliers when your numeric columns have extreme values.
-                    For ML, <b>clipping</b> is often safer than dropping rows.
-                  </p>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-flow3">Copy</button>
-                    <pre id="c-flow3"><code># Quick outlier check
-mask = dt.outlier_mask_iqr()
-print("Outlier rows:", mask.sum())
-
-# Safer: clip instead of dropping
-dt.clip_outliers_iqr(inplace=True)</code></pre>
-                  </div>
-                </div>
-
-                <div class="kv">
-                  <b>Step 4 — Encode categories</b>
-                  <p>
-                    If you have text categories (city, dept), convert them to numbers.
-                    Use one-hot encoding for most classical ML models.
-                  </p>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-flow4">Copy</button>
-                    <pre id="c-flow4"><code>dt.oneHotEncode(columns=["city", "dept"], drop_first=True)</code></pre>
-                  </div>
-                </div>
-
-                <div class="kv">
-                  <b>Step 5 — Scale numeric features (only when needed)</b>
-                  <p>
-                    Scaling is useful for models that are sensitive to feature magnitude
-                    (like logistic regression, SVM, KNN, gradient descent).
-                  </p>
-                  <div class="codewrap">
-                    <button class="copy" data-copy="c-flow5">Copy</button>
-                    <pre id="c-flow5"><code>dt.scale("standard", columns=["age", "salary"])</code></pre>
-                  </div>
-                </div>
-              </div>
-
-              <div class="note warn">
-                If you will train ML, split train/test first. Then fit transformations on train and apply to test.
-                (For now your utility is simple—later you can add pipeline helpers.)
-              </div>
+            <div class="quick-tips">
+                <h3>Quick Tips</h3>
+                <ul>
+                    <li>Search supports Enter to jump to first match</li>
+                    <li>Use method names like fillMissingValues</li>
+                    <li>Matches auto-expand and highlight</li>
+                </ul>
             </div>
-          </details>
         </div>
+    </aside>
 
-        <!-- SEARCH GUIDE -->
-        <div class="section" id="searchhelp">
-          <details data-search-tags="search guide how search works filter highlight count enter jump">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Search Guide (How search works + best usage)</div>
-                <div class="sumdesc">Friendly searching: what it searches, how it filters, and how to use it</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="kvs">
-                <div class="kv">
-                  <b>What search looks at</b>
-                  <ul>
-                    <li>Section title + subtitle text</li>
-                    <li>All content inside each section (including code examples)</li>
-                    <li>Extra tags in <code>data-search-tags</code> for better matching</li>
-                  </ul>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-background" style="background-image: url('hero-bg.png')">
+                    <div class="hero-overlay"></div>
+                    <div class="hero-accent-line"></div>
+                    <div class="hero-content">
+                        <div class="hero-badge">
+                            <span class="badge-dot"></span>
+                            <span>Technical Documentation</span>
+                        </div>
+                        <h2>DataUtility</h2>
+                        <p>Modular pandas toolkit for cleaning, EDA, outliers, encoding, scaling, and feature engineering</p>
+                    </div>
                 </div>
 
-                <div class="kv">
-                  <b>What search does when you type</b>
-                  <ul>
-                    <li>Shows how many sections match</li>
-                    <li>Hides non-matching sections (so reading becomes focused)</li>
-                    <li>Auto-expands matching sections</li>
-                    <li>Highlights <b>all occurrences</b> of the keyword inside the visible sections</li>
-                  </ul>
+                <div class="hero-cards">
+                    <div class="card">
+                        <div class="card-accent"></div>
+                        <h3>Why this library exists</h3>
+                        <p>Most projects repeat the same tasks. DataUtility keeps these steps consistent and reusable.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-accent"></div>
+                        <h3>What "safe" means here</h3>
+                        <p>Methods validate columns and types, avoid silent behavior, and support inplace=True/False.</p>
+                    </div>
                 </div>
+            </section>
 
-                <div class="kv">
-                  <b>How to search effectively</b>
-                  <ul>
-                    <li>Method name: <code>fillMissingValues</code>, <code>oneHotEncode</code>, <code>scale</code></li>
-                    <li>Topic: <code>outliers</code>, <code>duplicates</code>, <code>types</code></li>
-                    <li>Keyword: <code>median</code>, <code>drop_first</code>, <code>mapping</code></li>
-                  </ul>
-                </div>
-              </div>
+            <!-- Divider -->
+            <div class="divider"></div>
 
-              <div class="note">
-                Tip: press <span class="kbd">Enter</span> while searching to auto-scroll to the first visible match.
-              </div>
+            <!-- Sections Container -->
+            <div class="sections-container" id="sectionsContainer"></div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <p id="emptyStateText"></p>
+                <button class="btn btn-primary" id="clearSearchBtn">Clear Search</button>
             </div>
-          </details>
         </div>
+    </main>
 
-        <!-- EDA -->
-        <div class="section" id="inspection">
-          <details open data-search-tags="eda inspection overview insights missingReport head tail">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Inspection and EDA</div>
-                <div class="sumdesc">head(), tail(), insights(), overview(), missingReport()</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
+    <!-- Floating Action Button -->
+    <button class="fab" id="fab" aria-label="Back to top" style="display: none;">
+        <span>↑</span>
+    </button>
 
-            <div class="inner">
-              <div class="tabs" role="tablist" aria-label="EDA examples">
-                <button class="tab active" data-tab="eda-1" type="button" role="tab" aria-selected="true">Basic</button>
-                <button class="tab" data-tab="eda-2" type="button" role="tab" aria-selected="false">Overview</button>
-                <button class="tab" data-tab="eda-3" type="button" role="tab" aria-selected="false">When to use</button>
-              </div>
-
-              <div class="tabpanel active" id="eda-1" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-eda1">Copy</button>
-                  <pre id="c-eda1"><code>dt.head()
-dt.tail()
-dt.insights()</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="eda-2" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-eda2">Copy</button>
-                  <pre id="c-eda2"><code>summary, info = dt.overview()
-print(summary)
-print(info)
-
-dt.missingReport()</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="eda-3" role="tabpanel">
-                <div class="note">
-                  Use EDA methods at the start of every project:
-                  <ul>
-                    <li><code>head()/tail()</code> to sanity-check rows</li>
-                    <li><code>insights()</code> to see numeric stats quickly</li>
-                    <li><code>overview()</code> to get summary + info together</li>
-                    <li><code>missingReport()</code> before deciding fill vs drop</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- MISSING -->
-        <div class="section" id="missing">
-          <details open data-search-tags="missing null nan fill drop duplicates groupby median mean mode">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Missing Values and Duplicates</div>
-                <div class="sumdesc">fillMissingValues(), dropMissingValues(), fillMissingGroupBy(), dropDuplicates()</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="tabs" role="tablist" aria-label="Missing values examples">
-                <button class="tab active" data-tab="miss-1" type="button" role="tab" aria-selected="true">Fill</button>
-                <button class="tab" data-tab="miss-2" type="button" role="tab" aria-selected="false">Drop</button>
-                <button class="tab" data-tab="miss-3" type="button" role="tab" aria-selected="false">Group-based</button>
-                <button class="tab" data-tab="miss-4" type="button" role="tab" aria-selected="false">How to choose</button>
-              </div>
-
-              <div class="tabpanel active" id="miss-1" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-miss1">Copy</button>
-                  <pre id="c-miss1"><code>dt.fillMissingValues("mean")
-dt.fillMissingValues("median", columns=["age"])
-dt.fillMissingValues("mode", columns=["city"])
-dt.fillMissingValues("value", value=0)</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="miss-2" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-miss2">Copy</button>
-                  <pre id="c-miss2"><code># Drop rows with too many missing values
-dt.dropMissingValues(axis=0, thresh=5)
-
-# Drop columns with too many missing values
-dt.dropMissingValues(axis=1, thresh=100)</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="miss-3" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-miss3">Copy</button>
-                  <pre id="c-miss3"><code># Fill salary per department using median (default)
-dt.fillMissingGroupBy("department", "salary")
-
-# Or use mean or mode
-dt.fillMissingGroupBy("department", "salary", strategy="mean")
-dt.fillMissingGroupBy("department", "city", strategy="mode")</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="miss-4" role="tabpanel">
-                <div class="note">
-                  <b>How to choose fill strategy:</b>
-                  <ul>
-                    <li><b>Mean</b>: good if data is symmetric (no extreme outliers)</li>
-                    <li><b>Median</b>: safer if there are outliers (salary, prices)</li>
-                    <li><b>Mode</b>: best for categorical columns (city, dept)</li>
-                    <li><b>Group-based</b>: best when groups behave differently (salary depends on department)</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div class="note">
-                Duplicate removal supports full-row duplicates or subset-based duplicates.
-              </div>
-
-              <div class="codewrap">
-                <button class="copy" data-copy="c-dups">Copy</button>
-                <pre id="c-dups"><code>dt.dropDuplicates()
-dt.dropDuplicates(columns=["email"])
-dt.dropDuplicates(columns=["email"], keep="last")
-dt.dropDuplicates(columns=["email"], keep=False)</code></pre>
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- OUTLIERS -->
-        <div class="section" id="outliers">
-          <details open data-search-tags="outliers iqr zscore mask clip detect">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Outliers</div>
-                <div class="sumdesc">IQR and Z-score: masks, filtering, and clipping</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="tabs" role="tablist" aria-label="Outliers examples">
-                <button class="tab active" data-tab="out-1" type="button" role="tab" aria-selected="true">IQR</button>
-                <button class="tab" data-tab="out-2" type="button" role="tab" aria-selected="false">Z-score</button>
-                <button class="tab" data-tab="out-3" type="button" role="tab" aria-selected="false">When to use</button>
-              </div>
-
-              <div class="tabpanel active" id="out-1" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-iqr">Copy</button>
-                  <pre id="c-iqr"><code># Detect outlier rows (IQR)
-outliers = dt.detect_outliers_iqr()
-
-# Get mask for outliers (IQR)
-mask = dt.outlier_mask_iqr()
-
-# Clip outliers (IQR)
-dt.clip_outliers_iqr(inplace=True)</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="out-2" role="tabpanel">
-                <div class="codewrap">
-                  <button class="copy" data-copy="c-z">Copy</button>
-                  <pre id="c-z"><code># Detect outlier rows (Z-score)
-outliers = dt.detect_outliers_zscore(z=3)
-
-# Get mask for outliers (Z-score)
-mask = dt.outlier_mask_zscore(z=3)
-
-# Clip outliers (Z-score)
-dt.clip_outliers_zscore(z=3, inplace=True)</code></pre>
-                </div>
-              </div>
-
-              <div class="tabpanel" id="out-3" role="tabpanel">
-                <div class="note warn">
-                  Use outliers when:
-                  <ul>
-                    <li>Numeric columns have extreme values (salary, revenue, weights)</li>
-                    <li>Your model becomes unstable or metrics are weird</li>
-                    <li>You see very large std / skew</li>
-                  </ul>
-                  Prefer <b>clipping</b> for ML to reduce data loss.
-                </div>
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- ENCODING -->
-        <div class="section" id="encoding">
-          <details data-search-tags="encoding one hot label encode categorical mapping drop_first">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Encoding</div>
-                <div class="sumdesc">oneHotEncode() and labelEncode()</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="codewrap">
-                <button class="copy" data-copy="c-enc">Copy</button>
-                <pre id="c-enc"><code># One-hot encode (auto-detect categorical columns)
-dt.oneHotEncode()
-
-# One-hot encode specific columns
-dt.oneHotEncode(columns=["city", "dept"], drop_first=True)
-
-# Label encode one column (optional mapping)
-df_encoded, mapping = dt.labelEncode("category", return_mapping=True)</code></pre>
-              </div>
-
-              <div class="note warn">
-                <b>Tip:</b> Label encoding turns categories into integers. For most ML models,
-                one-hot is safer unless you are sure the model handles ordinal meaning correctly.
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- SCALING -->
-        <div class="section" id="scaling">
-          <details data-search-tags="scaling standard minmax normalize numeric">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Scaling</div>
-                <div class="sumdesc">scale() with standardization and min-max</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="codewrap">
-                <button class="copy" data-copy="c-scale">Copy</button>
-                <pre id="c-scale"><code># Standardize all numeric columns
-dt.scale("standard")
-
-# Min-max scale selected columns
-dt.scale("minmax", columns=["age", "salary"])</code></pre>
-              </div>
-
-              <div class="note">
-                Scaling affects numeric columns only. Constant columns (std=0) should be skipped safely.
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- FEATURES -->
-        <div class="section" id="features">
-          <details data-search-tags="feature engineering combineFeatures eval expressions derived">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Feature Engineering</div>
-                <div class="sumdesc">combineFeatures() using expressions on existing columns</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="codewrap">
-                <button class="copy" data-copy="c-feat">Copy</button>
-                <pre id="c-feat"><code>dt.combineFeatures("profit", "revenue - cost")
-dt.combineFeatures("bmi", "weight / (height ** 2)")
-dt.combineFeatures("full_name", "first + ' ' + last")</code></pre>
-              </div>
-
-              <div class="note">
-                Expressions run using pandas <code>DataFrame.eval(..., engine="python")</code>.
-                If a column name is wrong, you should raise a clear error.
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- TEXT -->
-        <div class="section" id="text">
-          <details data-search-tags="text cleaning cleanText lower strip punct spaces nlp">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Text Cleaning</div>
-                <div class="sumdesc">cleanText() for basic normalization</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="codewrap">
-                <button class="copy" data-copy="c-text">Copy</button>
-                <pre id="c-text"><code>dt.cleanText(
-    ["review_text"],
-    lower=True,
-    strip=True,
-    remove_punct=True,
-    remove_extra_spaces=True
-)</code></pre>
-              </div>
-
-              <div class="note">
-                This stays intentionally simple. Later you can add stopwords, stemming, tokenization, or sklearn pipelines.
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- TYPES -->
-        <div class="section" id="types">
-          <details data-search-tags="types conversion datetime int float bool category">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">Type Conversion</div>
-                <div class="sumdesc">to_int(), to_float(), to_string(), to_bool(), to_datetime(), to_category()</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="codewrap">
-                <button class="copy" data-copy="c-types">Copy</button>
-                <pre id="c-types"><code>dt.to_int("age")
-dt.to_float("price")
-dt.to_datetime("date")     # invalid values become NaT
-dt.to_category("city")</code></pre>
-              </div>
-
-              <div class="note warn">
-                Conversions can fail if values are incompatible (example: non-numeric strings → int).
-                Clean values first if needed.
-              </div>
-            </div>
-          </details>
-        </div>
-
-        <!-- LICENSE -->
-        <div class="section" id="license">
-          <details data-search-tags="license author usage github pages docs">
-            <summary>
-              <div class="sumleft">
-                <div class="sumtitle">License and Author</div>
-                <div class="sumdesc">Educational and personal use; add a formal license if publishing publicly</div>
-              </div>
-              <div class="chev" aria-hidden="true">⌄</div>
-            </summary>
-
-            <div class="inner">
-              <div class="kvs">
-                <div class="kv">
-                  <b>Author</b>
-                  Ammar Yaser Al-Haroun (AI and Data Science Student)
-                </div>
-                <div class="kv">
-                  <b>License</b>
-                  Educational/personal use. If publishing publicly, consider MIT license (simple + common).
-                </div>
-              </div>
-
-              <footer class="foot">
-                Tip: Put this page under <code>docs/</code>. Later you can enable GitHub Pages to publish it.
-              </footer>
-            </div>
-          </details>
-        </div>
-
-      </section>
-    </div>
-  </main>
-
-  <div class="fab hidden" id="fab" aria-hidden="true">
-    <button class="btn" id="backTop" type="button" title="Back to top">Top</button>
-  </div>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
