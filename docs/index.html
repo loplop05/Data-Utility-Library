@@ -1,178 +1,273 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="DataUtility: modular pandas toolkit for data cleaning, EDA, outliers, encoding, scaling, feature engineering, text cleaning, and type conversions." />
-  <title>DataUtility Documentation</title>
+  <meta name="theme-color" content="#070A12" />
+  <title>DataUtility Docs</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-  <!-- Skip link for accessibility -->
+  <!-- Skip for accessibility -->
   <a class="skip-link" href="#mainContent">Skip to content</a>
 
-  <!-- Header -->
-  <header class="header" role="banner">
-    <div class="header-container">
-      <div class="logo-section">
-        <button class="menu-toggle" id="menuToggle" aria-label="Open navigation">
-          <span></span><span></span><span></span>
-        </button>
+  <!-- Announcement (global product style) -->
+  <div class="announcement" role="region" aria-label="Announcement">
+    <div class="announcement-inner">
+      <span class="pill">NEW</span>
+      <span>DataUtility Docs updated — faster search + cleaner API reference.</span>
+      <a class="announcement-link" href="#sections">See updates</a>
+    </div>
+  </div>
 
-        <div class="logo" aria-label="DataUtility Documentation">
-          <div class="logo-icon" aria-hidden="true">D</div>
-          <div class="logo-text">
-            <h1>DataUtility</h1>
-            <p>Documentation</p>
-          </div>
-        </div>
+  <!-- Global Header / Top Nav -->
+  <header class="topbar" role="banner">
+    <div class="topbar-inner">
+
+      <!-- Left: Brand + primary nav -->
+      <div class="topbar-left">
+        <a class="brand" href="#" aria-label="DataUtility Home">
+          <span class="brand-icon" aria-hidden="true">D</span>
+          <span class="brand-text">
+            <strong>DataUtility</strong>
+            <small>Docs</small>
+          </span>
+        </a>
+
+        <nav class="primary-nav" aria-label="Primary">
+          <a class="nav-item active" href="#">Documentation</a>
+          <a class="nav-item" href="#">Guides</a>
+          <a class="nav-item" href="#">API</a>
+          <a class="nav-item" href="#">Examples</a>
+        </nav>
       </div>
 
-      <!-- Search -->
-      <div class="search-container" role="search">
-        <input
-          type="search"
-          id="searchInput"
-          class="search-input"
-          placeholder="Search methods, modules, keywords…"
-          aria-label="Search documentation"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <button class="search-clear" id="clearSearch" aria-label="Clear search">✕</button>
-
-        <!-- Results meta (JS can update it) -->
+      <!-- Center: Search -->
+      <div class="topbar-center" role="search">
+        <div class="search-wrap">
+          <span class="search-ico" aria-hidden="true">⌕</span>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="search"
+            placeholder="Search docs… (Ctrl/⌘ + K)"
+            aria-label="Search documentation"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="search-clear" id="clearSearch" aria-label="Clear search">✕</button>
+        </div>
         <div class="search-meta" id="searchMeta" aria-live="polite"></div>
       </div>
 
-      <!-- Actions -->
-      <div class="header-actions" aria-label="Page actions">
-        <button class="btn btn-outline" id="expandBtn" type="button" title="Expand all sections">
-          Expand
+      <!-- Right: Global controls -->
+      <div class="topbar-right" aria-label="Global controls">
+        <div class="select">
+          <label class="sr-only" for="versionSelect">Version</label>
+          <select id="versionSelect" aria-label="Version selector">
+            <option>v1.0</option>
+            <option>v1.1</option>
+            <option>v2.0</option>
+          </select>
+        </div>
+
+        <div class="select">
+          <label class="sr-only" for="langSelect">Language</label>
+          <select id="langSelect" aria-label="Language selector">
+            <option value="en" selected>English</option>
+            <option value="ar">العربية</option>
+            <option value="fr">Français</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
+
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Toggle theme">
+          ☾
         </button>
-        <button class="btn btn-outline" id="collapseBtn" type="button" title="Collapse all sections">
-          Collapse
+
+        <a class="btn btn-primary" href="#" aria-label="GitHub Repository">GitHub</a>
+
+        <!-- Mobile nav toggle -->
+        <button class="icon-btn mobile-only" id="menuToggle" type="button" aria-label="Open navigation">
+          ☰
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Overlay for mobile sidebar -->
+  <!-- Mobile overlay -->
   <div class="overlay" id="overlay" aria-hidden="true"></div>
 
-  <!-- Sidebar -->
+  <!-- Left Sidebar (Docs navigation) -->
   <aside class="sidebar" id="sidebar" aria-label="Documentation navigation">
-    <div class="sidebar-content">
-      <div class="sidebar-header">
-        <h2>Contents</h2>
-        <button class="close-btn" id="closeSidebar" aria-label="Close navigation">✕</button>
+    <div class="sidebar-inner">
+      <div class="sidebar-head">
+        <div class="sidebar-title">
+          <strong>Contents</strong>
+          <small>Navigate modules</small>
+        </div>
+        <button class="icon-btn mobile-only" id="closeSidebar" aria-label="Close navigation">✕</button>
       </div>
 
-      <!-- Nav generated by JS -->
+      <!-- Generated by JS -->
       <nav class="nav-menu" id="navMenu" aria-label="Sections list"></nav>
 
-      <!-- Tags -->
       <section class="tags-section" aria-label="Tags filter">
-        <h3>Tags</h3>
+        <h3>Filter by tag</h3>
         <div class="tags-container" id="tagsContainer"></div>
       </section>
 
-      <!-- Tips -->
-      <section class="quick-tips" aria-label="Quick tips">
-        <h3>Quick Tips</h3>
+      <section class="tips" aria-label="Quick tips">
+        <h3>Tips</h3>
         <ul>
-          <li>Press <kbd>Enter</kbd> to jump to first match</li>
-          <li>Try method names like <code>fillMissingValues</code></li>
-          <li>Use the sidebar to jump between modules</li>
+          <li><kbd>Ctrl/⌘ + K</kbd> focus search</li>
+          <li><kbd>Enter</kbd> jump to first result</li>
+          <li>Search supports method names like <code>missingRows</code></li>
         </ul>
       </section>
     </div>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main-content" id="mainContent" role="main">
-    <div class="content-wrapper">
+  <!-- Main layout -->
+  <div class="layout">
 
-      <!-- Mini breadcrumb / location line -->
-      <div class="breadcrumb">
-        <span class="dot" aria-hidden="true"></span>
-        <span>Docs</span>
-        <span class="sep" aria-hidden="true">/</span>
-        <span>API Reference</span>
-      </div>
+    <!-- Main content -->
+    <main class="main" id="mainContent" role="main">
+      <div class="container">
 
-      <!-- Hero -->
-      <section class="hero-section" aria-label="Documentation intro">
-        <div class="hero-background">
-          <div class="hero-accent-line" aria-hidden="true"></div>
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" aria-label="Breadcrumb">
+          <a href="#">Home</a>
+          <span class="sep">/</span>
+          <a href="#">Docs</a>
+          <span class="sep">/</span>
+          <span aria-current="page">API Reference</span>
+        </div>
 
-          <div class="hero-content">
+        <!-- Hero -->
+        <section class="hero" aria-label="Intro">
+          <div class="hero-card">
             <div class="hero-badge">
-              <span class="badge-dot" aria-hidden="true"></span>
-              <span>Technical Documentation</span>
+              <span class="dot" aria-hidden="true"></span>
+              <span>API Reference</span>
             </div>
 
-            <h2>DataUtility</h2>
+            <h1>DataUtility Documentation</h1>
             <p>
-              Modular pandas toolkit for cleaning, EDA, outliers, encoding, scaling, and feature engineering.
-              Designed to be consistent, reusable, and safe.
+              A modular toolkit for data cleaning, EDA, missing values, outliers, encoding, scaling,
+              and feature engineering — designed for consistent workflows.
             </p>
 
-            <!-- small hint row -->
-            <div class="hero-hints" aria-label="Search hints">
-              <span class="hint">Tip: search by method name</span>
-              <span class="hint">Example: <code>missingRows</code></span>
+            <div class="hero-actions">
+              <a class="btn btn-outline" href="#sections">Browse sections</a>
+              <button class="btn" id="expandBtn" type="button">Expand all</button>
+              <button class="btn" id="collapseBtn" type="button">Collapse all</button>
             </div>
           </div>
+
+          <div class="hero-grid" aria-label="Highlights">
+            <article class="mini">
+              <h3>Consistent APIs</h3>
+              <p>Reusable functions with predictable inputs/outputs.</p>
+            </article>
+            <article class="mini">
+              <h3>Safe behavior</h3>
+              <p>Validation + fewer silent surprises for students/projects.</p>
+            </article>
+            <article class="mini">
+              <h3>Fast navigation</h3>
+              <p>Search + tags + active section highlighting.</p>
+            </article>
+          </div>
+        </section>
+
+        <div class="divider" role="separator"></div>
+
+        <!-- Anchor -->
+        <span id="sections"></span>
+
+        <!-- Docs sections -->
+        <section class="docs" aria-label="Documentation sections">
+          <div class="sections-container" id="sectionsContainer"></div>
+
+          <div class="empty-state" id="emptyState" style="display:none;">
+            <p id="emptyStateText"></p>
+            <button class="btn btn-primary" id="clearSearchBtn" type="button">Clear Search</button>
+          </div>
+        </section>
+
+        <!-- Global footer -->
+        <footer class="footer" aria-label="Footer">
+          <div class="footer-grid">
+            <div>
+              <div class="footer-brand">
+                <span class="brand-icon" aria-hidden="true">D</span>
+                <div>
+                  <strong>DataUtility</strong>
+                  <p class="muted">Documentation & API reference</p>
+                </div>
+              </div>
+              <p class="muted">
+                Built for students + real projects. Make your preprocessing consistent and reusable.
+              </p>
+            </div>
+
+            <div>
+              <h4>Docs</h4>
+              <a href="#">Getting started</a>
+              <a href="#">API Reference</a>
+              <a href="#">Examples</a>
+              <a href="#">Changelog</a>
+            </div>
+
+            <div>
+              <h4>Community</h4>
+              <a href="#">GitHub</a>
+              <a href="#">Issues</a>
+              <a href="#">Discussions</a>
+              <a href="#">Contributing</a>
+            </div>
+
+            <div>
+              <h4>Legal</h4>
+              <a href="#">Privacy</a>
+              <a href="#">Terms</a>
+              <a href="#">License</a>
+              <a href="#">Security</a>
+            </div>
+          </div>
+
+          <div class="footer-bottom">
+            <span class="muted">© <span id="year"></span> DataUtility</span>
+            <span class="muted">Built for a global documentation experience.</span>
+          </div>
+        </footer>
+      </div>
+    </main>
+
+    <!-- Right TOC (global docs style) -->
+    <aside class="toc" aria-label="On this page">
+      <div class="toc-card">
+        <h3>On this page</h3>
+        <div class="toc-links" id="tocLinks">
+          <!-- Optional: JS can fill this later (active headings) -->
+          <a href="#sections">Sections</a>
+          <a href="#missing-values">Missing Values</a>
+          <a href="#duplicates">Duplicates</a>
         </div>
+      </div>
+    </aside>
+  </div>
 
-        <!-- Feature cards -->
-        <div class="hero-cards" aria-label="Highlights">
-          <article class="card">
-            <h3>Why this library exists</h3>
-            <p>Most projects repeat the same tasks. DataUtility keeps steps consistent and reusable.</p>
-          </article>
+  <!-- Back to top -->
+  <button class="fab" id="fab" aria-label="Back to top" style="display:none;">↑</button>
 
-          <article class="card">
-            <h3>What “safe” means</h3>
-            <p>Methods validate inputs, avoid silent behavior, and support <code>inplace</code> options.</p>
-          </article>
-        </div>
-      </section>
-
-      <div class="divider" role="separator"></div>
-
-      <!-- Sections -->
-      <section aria-label="Documentation sections">
-        <div class="sections-container" id="sectionsContainer"></div>
-      </section>
-
-      <!-- Empty state -->
-      <section class="empty-state" id="emptyState" style="display:none;" aria-label="No results">
-        <p id="emptyStateText"></p>
-        <button class="btn btn-primary" id="clearSearchBtn" type="button">Clear Search</button>
-      </section>
-
-      <!-- Footer -->
-      <footer class="docs-footer" aria-label="Footer">
-        <div class="footer-inner">
-          <p>
-            <strong>DataUtility</strong> — modular tools for data cleaning & analysis.
-          </p>
-          <p class="muted">
-            Built for readable docs, fast searching, and consistent workflows.
-          </p>
-        </div>
-      </footer>
-
-    </div>
-  </main>
-
-  <!-- Floating Action Button -->
-  <button class="fab" id="fab" aria-label="Back to top" style="display:none;">
-    ↑
-  </button>
+  <script>
+    // small footer year (safe even if script.js exists)
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
 
   <script src="script.js"></script>
 </body>
