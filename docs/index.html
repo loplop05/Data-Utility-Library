@@ -1,129 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="DataUtility: modular pandas toolkit for data cleaning, EDA, outliers, encoding, scaling, feature engineering, text cleaning, and type conversions.">
-    <title>DataUtility Documentation</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DataUtility: modular pandas toolkit for data cleaning, EDA, outliers, encoding, scaling, feature engineering, text cleaning, and type conversions." />
+  <title>DataUtility Documentation</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <div class="logo-section">
-                <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <div class="logo">
-                    <div class="logo-icon">D</div>
-                    <div class="logo-text">
-                        <h1>DataUtility</h1>
-                        <p>Documentation</p>
-                    </div>
-                </div>
-            </div>
+  <!-- top progress -->
+  <div class="reading-progress" id="readingProgress"></div>
 
-            <div class="search-container">
-                <input 
-                    type="search" 
-                    id="searchInput" 
-                    class="search-input" 
-                    placeholder="Search documentation..."
-                    aria-label="Search documentation"
-                >
-                <button class="search-clear" id="clearSearch" aria-label="Clear search">✕</button>
-            </div>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-container">
+      <div class="logo-section">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
 
-            <div class="header-actions">
-                <button class="btn btn-outline" id="expandBtn">Expand</button>
-                <button class="btn btn-outline" id="collapseBtn">Collapse</button>
-            </div>
+        <div class="logo">
+          <div class="logo-icon">D</div>
+          <div class="logo-text">
+            <h1>DataUtility</h1>
+            <p>Documentation</p>
+          </div>
         </div>
-    </header>
+      </div>
 
-    <!-- Overlay for mobile sidebar -->
-    <div class="overlay" id="overlay"></div>
+      <div class="search-container">
+        <div class="search-icon" aria-hidden="true">⌕</div>
+        <input
+          type="search"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search docs… (Ctrl/⌘ + K)"
+          aria-label="Search documentation"
+        />
+        <button class="search-clear" id="clearSearch" aria-label="Clear search">✕</button>
+        <div class="search-meta" id="searchMeta" aria-live="polite"></div>
+      </div>
 
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-content">
-            <div class="sidebar-header">
-                <h2>Contents</h2>
-                <button class="close-btn" id="closeSidebar" aria-label="Close sidebar">✕</button>
+      <div class="header-actions">
+        <button class="btn btn-outline" id="expandBtn" title="Expand all sections">Expand</button>
+        <button class="btn btn-outline" id="collapseBtn" title="Collapse all sections">Collapse</button>
+        <button class="btn btn-primary" id="themeBtn" title="Toggle theme">Theme</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Overlay for mobile sidebar -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-glow" aria-hidden="true"></div>
+
+    <div class="sidebar-content">
+      <div class="sidebar-header">
+        <h2>Contents</h2>
+        <button class="close-btn" id="closeSidebar" aria-label="Close sidebar">✕</button>
+      </div>
+
+      <nav class="nav-menu" id="navMenu"></nav>
+
+      <div class="tags-section">
+        <h3>Tags</h3>
+        <div class="tags-container" id="tagsContainer"></div>
+      </div>
+
+      <div class="quick-tips">
+        <h3>Quick Tips</h3>
+        <ul>
+          <li><kbd>Enter</kbd> jumps to first match</li>
+          <li>Try method names like <code>fillMissingValues</code></li>
+          <li>Matches auto-expand + highlight</li>
+          <li><kbd>Ctrl/⌘ + K</kbd> focuses search</li>
+        </ul>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-wrapper">
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-background">
+          <div class="hero-overlay"></div>
+          <div class="hero-accent-line"></div>
+
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span class="badge-dot"></span>
+              <span>Technical Documentation</span>
             </div>
 
-            <nav class="nav-menu" id="navMenu"></nav>
+            <h2>DataUtility</h2>
+            <p>Modular pandas toolkit for cleaning, EDA, outliers, encoding, scaling, and feature engineering</p>
 
-            <div class="tags-section">
-                <h3>Tags</h3>
-                <div class="tags-container" id="tagsContainer"></div>
+            <div class="hero-actions">
+              <a class="pill" href="#sections">Browse Methods</a>
+              <button class="pill pill-ghost" id="copyCmdBtn" type="button">Copy Install Command</button>
             </div>
-
-            <div class="quick-tips">
-                <h3>Quick Tips</h3>
-                <ul>
-                    <li>Search supports Enter to jump to first match</li>
-                    <li>Use method names like fillMissingValues</li>
-                    <li>Matches auto-expand and highlight</li>
-                </ul>
-            </div>
+          </div>
         </div>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <div class="content-wrapper">
-            <!-- Hero Section -->
-            <section class="hero-section">
-                <div class="hero-background" style="background-image: url('hero-bg.png')">
-                    <div class="hero-overlay"></div>
-                    <div class="hero-accent-line"></div>
-                    <div class="hero-content">
-                        <div class="hero-badge">
-                            <span class="badge-dot"></span>
-                            <span>Technical Documentation</span>
-                        </div>
-                        <h2>DataUtility</h2>
-                        <p>Modular pandas toolkit for cleaning, EDA, outliers, encoding, scaling, and feature engineering</p>
-                    </div>
-                </div>
+        <div class="hero-cards">
+          <div class="card">
+            <div class="card-accent"></div>
+            <h3>Why this library exists</h3>
+            <p>Most projects repeat the same tasks. DataUtility keeps these steps consistent and reusable.</p>
+          </div>
 
-                <div class="hero-cards">
-                    <div class="card">
-                        <div class="card-accent"></div>
-                        <h3>Why this library exists</h3>
-                        <p>Most projects repeat the same tasks. DataUtility keeps these steps consistent and reusable.</p>
-                    </div>
-                    <div class="card">
-                        <div class="card-accent"></div>
-                        <h3>What "safe" means here</h3>
-                        <p>Methods validate columns and types, avoid silent behavior, and support inplace=True/False.</p>
-                    </div>
-                </div>
-            </section>
+          <div class="card">
+            <div class="card-accent"></div>
+            <h3>What “safe” means here</h3>
+            <p>Methods validate columns and types, avoid silent behavior, and support <code>inplace=True/False</code>.</p>
+          </div>
 
-            <!-- Divider -->
-            <div class="divider"></div>
-
-            <!-- Sections Container -->
-            <div class="sections-container" id="sectionsContainer"></div>
-
-            <!-- Empty State -->
-            <div class="empty-state" id="emptyState" style="display: none;">
-                <p id="emptyStateText"></p>
-                <button class="btn btn-primary" id="clearSearchBtn">Clear Search</button>
-            </div>
+          <div class="card">
+            <div class="card-accent"></div>
+            <h3>Fast navigation</h3>
+            <p>Auto-highlight active section, smooth scroll, and tag filters for quicker discovery.</p>
+          </div>
         </div>
-    </main>
+      </section>
 
-    <!-- Floating Action Button -->
-    <button class="fab" id="fab" aria-label="Back to top" style="display: none;">
-        <span>↑</span>
-    </button>
+      <!-- Divider -->
+      <div class="divider"></div>
 
-    <script src="script.js"></script>
+      <span id="sections"></span>
+
+      <!-- Sections Container -->
+      <div class="sections-container" id="sectionsContainer"></div>
+
+      <!-- Empty State -->
+      <div class="empty-state" id="emptyState" style="display: none;">
+        <p id="emptyStateText"></p>
+        <button class="btn btn-primary" id="clearSearchBtn">Clear Search</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Floating Action Button -->
+  <button class="fab" id="fab" aria-label="Back to top" style="display: none;">
+    <span>↑</span>
+  </button>
+
+  <script src="script.js"></script>
 </body>
 </html>

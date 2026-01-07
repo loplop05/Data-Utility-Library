@@ -1,459 +1,405 @@
-/**
- * DataUtility Documentation - JavaScript
- * Handles all interactive functionality including search, navigation, and animations
- */
+/* -------------------------
+   DataUtility Docs Interactions
+-------------------------- */
+(function () {
+  const $ = (id) => document.getElementById(id);
 
-// ============================================================================
-// Data
-// ============================================================================
+  const menuToggle = $("menuToggle");
+  const sidebar = $("sidebar");
+  const overlay = $("overlay");
+  const closeSidebar = $("closeSidebar");
 
-const sections = [
+  const searchInput = $("searchInput");
+  const clearSearch = $("clearSearch");
+  const clearSearchBtn = $("clearSearchBtn");
+  const searchMeta = $("searchMeta");
+
+  const navMenu = $("navMenu");
+  const tagsContainer = $("tagsContainer");
+  const sectionsContainer = $("sectionsContainer");
+
+  const expandBtn = $("expandBtn");
+  const collapseBtn = $("collapseBtn");
+  const themeBtn = $("themeBtn");
+
+  const fab = $("fab");
+  const toast = $("toast");
+  const readingProgress = $("readingProgress");
+  const emptyState = $("emptyState");
+  const emptyStateText = $("emptyStateText");
+
+  const copyCmdBtn = $("copyCmdBtn");
+
+  // ---------------------------
+  // Demo data (REMOVE if you already generate your docs from your library)
+  // ---------------------------
+  const DEMO_SECTIONS = [
     {
-        id: 'overview',
-        title: 'Overview',
-        description: 'What DataUtility is and why it exists',
-        tags: ['intro', 'overview'],
-        content: 'DataUtility is a lightweight, modular Python utility library built on top of pandas to simplify data cleaning, exploration (EDA), and preprocessing. You use one class: DataTools. Internally, methods are organized into modules.',
-        subsections: [
-            {
-                title: 'Why this library exists',
-                content: 'Most projects repeat the same tasks: inspect datasets, handle missing values, remove duplicates, detect outliers, encode categories, scale numeric features, and create derived features. DataUtility keeps these steps consistent and reusable.'
-            },
-            {
-                title: 'What "safe" means here',
-                content: 'Methods validate columns and types, avoid silent behavior, and support inplace=True/False so you choose between modifying dt.df or returning a copy.'
-            }
-        ]
+      id: "missing-values",
+      title: "Missing Values",
+      subtitle: "Count, drop, fill, and audit missing data safely",
+      tag: "Cleaning",
+      methods: [
+        { name: "missingRows()", desc: "Return rows that contain at least one missing value." },
+        { name: "missingColumns()", desc: "Return columns that contain at least one missing value." },
+        { name: "fillMissingValues(strategy='mean')", desc: "Fill missing values using mean/median/mode or custom value." },
+      ],
     },
     {
-        id: 'quickstart',
-        title: 'Quick Start',
-        description: 'Install requirements and create your first DataTools instance',
-        tags: ['install', 'import', 'quickstart'],
-        content: 'Get started with DataUtility in just a few steps. Install pandas and numpy, then import DataTools and create your first instance.',
-        subsections: [
-            {
-                title: '1) Install',
-                content: 'pip install pandas numpy',
-                isCode: true
-            },
-            {
-                title: '2) Import + create DataTools',
-                content: `import pandas as pd
-from data_utility import DataTools
-
-df = pd.read_csv("data.csv")
-dt = DataTools(df)`,
-                isCode: true
-            }
-        ]
+      id: "duplicates",
+      title: "Duplicates",
+      subtitle: "Detect and remove duplicates with control",
+      tag: "Cleaning",
+      methods: [
+        { name: "duplicateRows()", desc: "Return duplicated rows (keep='first'/'last'/False)." },
+        { name: "dropDuplicates()", desc: "Drop duplicates with subset columns support." },
+      ],
     },
     {
-        id: 'structure',
-        title: 'Project Structure',
-        description: 'Modular files combined into one DataTools class',
-        tags: ['structure', 'modules', 'package'],
-        content: 'The DataUtility package is organized into focused modules, each handling a specific aspect of data processing. All modules are unified through the main DataTools class.'
+      id: "outliers",
+      title: "Outliers",
+      subtitle: "IQR / z-score detection + safe reporting",
+      tag: "EDA",
+      methods: [
+        { name: "detectOutliersIQR(k=1.5)", desc: "Return rows containing outliers by IQR threshold." },
+        { name: "outlierSummary()", desc: "Summary table of outlier counts per numeric column." },
+      ],
     },
     {
-        id: 'design',
-        title: 'Design Principles',
-        description: 'Consistency rules used across every method',
-        tags: ['design', 'principles', 'validation'],
-        content: 'DataUtility follows strict design principles to ensure predictable, safe behavior across all methods.'
+      id: "encoding",
+      title: "Encoding",
+      subtitle: "Categorical encoding helpers",
+      tag: "Features",
+      methods: [
+        { name: "oneHotEncode(cols)", desc: "One-hot encode selected columns safely." },
+        { name: "labelEncode(col)", desc: "Label encode a single column with mapping output." },
+      ],
     },
-    {
-        id: 'missing',
-        title: 'Missing and Duplicates',
-        description: 'Fill or drop missing values and duplicates',
-        tags: ['missing', 'duplicates', 'cleaning'],
-        content: 'Handle missing values and duplicate rows with flexible, safe methods that give you control over the operation.'
-    },
-    {
-        id: 'outliers',
-        title: 'Outliers',
-        description: 'Detect and handle outliers using IQR and Z-score',
-        tags: ['outliers', 'detection', 'iqr', 'zscore'],
-        content: 'Identify and manage outliers in your data using industry-standard statistical methods.'
-    },
-    {
-        id: 'encoding',
-        title: 'Encoding',
-        description: 'Categorical encoding with oneHotEncode()',
-        tags: ['encoding', 'categorical', 'onehot'],
-        content: 'Convert categorical variables into numeric representations suitable for machine learning models.'
-    },
-    {
-        id: 'scaling',
-        title: 'Scaling',
-        description: 'Normalize and scale numeric features',
-        tags: ['scaling', 'normalization', 'standardization'],
-        content: 'Scale numeric features to a standard range for improved model performance.'
-    },
-    {
-        id: 'features',
-        title: 'Feature Engineering',
-        description: 'Create derived features with combineFeatures()',
-        tags: ['features', 'engineering', 'derivation'],
-        content: 'Generate new features from existing ones to improve model predictive power.'
-    },
-    {
-        id: 'text',
-        title: 'Text Cleaning',
-        description: 'Clean and preprocess text data',
-        tags: ['text', 'cleaning', 'preprocessing'],
-        content: 'Prepare text data for analysis with comprehensive cleaning utilities.'
-    },
-    {
-        id: 'types',
-        title: 'Type Conversion',
-        description: 'Convert between data types safely',
-        tags: ['types', 'conversion', 'datetime'],
-        content: 'Transform data types with validation and error handling.'
-    },
-    {
-        id: 'license',
-        title: 'License and Author',
-        description: 'Educational and personal use',
-        tags: ['license', 'author'],
-        content: 'DataUtility is available for educational and personal use. Author: Ammar Yaser Al-Haroun (AI and Data Science Student).'
-    }
-];
+  ];
 
-// ============================================================================
-// DOM Elements
-// ============================================================================
+  // ---------------------------
+  // Helpers
+  // ---------------------------
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add("show");
+    window.clearTimeout(showToast._t);
+    showToast._t = window.setTimeout(() => toast.classList.remove("show"), 1600);
+  }
 
-const menuToggle = document.getElementById('menuToggle');
-const sidebar = document.getElementById('sidebar');
-const overlay = document.getElementById('overlay');
-const closeSidebar = document.getElementById('closeSidebar');
-const searchInput = document.getElementById('searchInput');
-const clearSearch = document.getElementById('clearSearch');
-const clearSearchBtn = document.getElementById('clearSearchBtn');
-const expandBtn = document.getElementById('expandBtn');
-const collapseBtn = document.getElementById('collapseBtn');
-const sectionsContainer = document.getElementById('sectionsContainer');
-const navMenu = document.getElementById('navMenu');
-const tagsContainer = document.getElementById('tagsContainer');
-const fab = document.getElementById('fab');
-const emptyState = document.getElementById('emptyState');
-const emptyStateText = document.getElementById('emptyStateText');
+  function slugify(s) {
+    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
 
-// ============================================================================
-// State
-// ============================================================================
+  function escapeHtml(str) {
+    return String(str)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
-let expandedSections = new Set(['overview']);
-let filteredSections = [...sections];
-let currentSearchQuery = '';
+  function highlight(text, q) {
+    if (!q) return escapeHtml(text);
+    const safe = escapeHtml(text);
+    const re = new RegExp(`(${q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig");
+    return safe.replace(re, "<mark>$1</mark>");
+  }
 
-// ============================================================================
-// Initialization
-// ============================================================================
+  // ---------------------------
+  // Build UI from sections
+  // ---------------------------
+  let sections = DEMO_SECTIONS; // replace with your real data if you have it
+  let activeTag = null;
 
-document.addEventListener('DOMContentLoaded', () => {
-    renderNavigation();
-    renderTags();
-    renderSections();
-    setupEventListeners();
-});
-
-// ============================================================================
-// Event Listeners
-// ============================================================================
-
-function setupEventListeners() {
-    // Menu toggle
-    menuToggle.addEventListener('click', toggleSidebar);
-    closeSidebar.addEventListener('click', closeSidebarMenu);
-    overlay.addEventListener('click', closeSidebarMenu);
-
-    // Search
-    searchInput.addEventListener('input', handleSearch);
-    clearSearch.addEventListener('click', clearSearchInput);
-    clearSearchBtn.addEventListener('click', clearSearchInput);
-
-    // Expand/Collapse
-    expandBtn.addEventListener('click', expandAll);
-    collapseBtn.addEventListener('click', collapseAll);
-
-    // FAB
-    fab.addEventListener('click', scrollToTop);
-    window.addEventListener('scroll', handleScroll);
-
-    // Navigation items
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('.nav-item')) {
-            const navItem = e.target.closest('.nav-item');
-            const sectionId = navItem.dataset.sectionId;
-            const section = sections.find(s => s.id === sectionId);
-            if (section) {
-                expandedSections.add(sectionId);
-                renderSections();
-                closeSidebarMenu();
-                setTimeout(() => {
-                    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
-            }
-        }
+  function buildNav() {
+    navMenu.innerHTML = "";
+    sections.forEach((s) => {
+      const a = document.createElement("a");
+      a.href = `#${s.id}`;
+      a.className = "nav-link";
+      a.dataset.target = s.id;
+      a.innerHTML = `<span>${escapeHtml(s.title)}</span><small>${escapeHtml(s.tag)}</small>`;
+      a.addEventListener("click", () => closeSidebarUI(true));
+      navMenu.appendChild(a);
     });
+  }
 
-    // Section headers
-    document.addEventListener('click', (e) => {
-        const sectionHeader = e.target.closest('.section-header');
-        if (sectionHeader) {
-            const section = sectionHeader.closest('.section');
-            const sectionId = section.dataset.sectionId;
-            toggleSection(sectionId);
-        }
+  function buildTags() {
+    const tags = [...new Set(sections.map((s) => s.tag))].sort();
+    tagsContainer.innerHTML = "";
+
+    const all = document.createElement("button");
+    all.className = "tag" + (!activeTag ? " active" : "");
+    all.textContent = "All";
+    all.addEventListener("click", () => {
+      activeTag = null;
+      buildTags();
+      renderSections();
     });
+    tagsContainer.appendChild(all);
 
-    // Tags
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('.tag-item')) {
-            const tag = e.target.closest('.tag-item').textContent.trim();
-            searchInput.value = tag;
-            handleSearch();
-        }
+    tags.forEach((t) => {
+      const b = document.createElement("button");
+      b.className = "tag" + (activeTag === t ? " active" : "");
+      b.textContent = t;
+      b.addEventListener("click", () => {
+        activeTag = (activeTag === t) ? null : t;
+        buildTags();
+        renderSections();
+      });
+      tagsContainer.appendChild(b);
     });
+  }
 
-    // Tag buttons in sidebar
-    document.addEventListener('click', (e) => {
-        if (e.target.closest('.tag')) {
-            const tag = e.target.closest('.tag').textContent.trim();
-            searchInput.value = tag;
-            handleSearch();
-            closeSidebarMenu();
-        }
-    });
-}
+  function renderSections() {
+    const q = searchInput.value.trim();
+    const filtered = sections.filter((s) => !activeTag || s.tag === activeTag);
 
-// ============================================================================
-// Sidebar Functions
-// ============================================================================
+    sectionsContainer.innerHTML = "";
+    let visibleCount = 0;
+    let totalMatches = 0;
 
-function toggleSidebar() {
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    menuToggle.classList.toggle('active');
-}
+    filtered.forEach((s) => {
+      // compute match
+      const hay = (s.title + " " + s.subtitle + " " + s.methods.map(m => m.name + " " + m.desc).join(" ")).toLowerCase();
+      const isMatch = !q || hay.includes(q.toLowerCase());
 
-function closeSidebarMenu() {
-    sidebar.classList.remove('active');
-    overlay.classList.remove('active');
-    menuToggle.classList.remove('active');
-}
+      if (!isMatch) return;
 
-// ============================================================================
-// Search Functions
-// ============================================================================
+      visibleCount++;
 
-function handleSearch() {
-    const query = searchInput.value.toLowerCase().trim();
-    currentSearchQuery = query;
+      const sectionEl = document.createElement("article");
+      sectionEl.className = "doc-section open";
+      sectionEl.id = s.id;
 
-    if (!query) {
-        filteredSections = [...sections];
-        expandedSections = new Set(['overview']);
-    } else {
-        filteredSections = sections.filter(section =>
-            section.title.toLowerCase().includes(query) ||
-            section.description.toLowerCase().includes(query) ||
-            section.tags.some(tag => tag.toLowerCase().includes(query)) ||
-            section.content.toLowerCase().includes(query)
-        );
+      // count matches (simple)
+      if (q) {
+        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig");
+        const matches = hay.match(re);
+        totalMatches += matches ? matches.length : 0;
+      }
 
-        // Auto-expand matching sections
-        expandedSections = new Set(filteredSections.map(s => s.id));
-    }
-
-    // Update clear button visibility
-    clearSearch.classList.toggle('visible', query.length > 0);
-
-    renderSections();
-}
-
-function clearSearchInput() {
-    searchInput.value = '';
-    currentSearchQuery = '';
-    clearSearch.classList.remove('visible');
-    filteredSections = [...sections];
-    expandedSections = new Set(['overview']);
-    renderSections();
-    searchInput.focus();
-}
-
-// ============================================================================
-// Section Functions
-// ============================================================================
-
-function toggleSection(sectionId) {
-    if (expandedSections.has(sectionId)) {
-        expandedSections.delete(sectionId);
-    } else {
-        expandedSections.add(sectionId);
-    }
-    renderSections();
-}
-
-function expandAll() {
-    expandedSections = new Set(filteredSections.map(s => s.id));
-    renderSections();
-}
-
-function collapseAll() {
-    expandedSections.clear();
-    renderSections();
-}
-
-// ============================================================================
-// Rendering Functions
-// ============================================================================
-
-function renderNavigation() {
-    navMenu.innerHTML = sections.map(section => `
-        <div class="nav-item ${expandedSections.has(section.id) ? 'active' : ''}" data-section-id="${section.id}">
-            <div class="nav-item-title">${section.title}</div>
-            <div class="nav-item-desc">${section.description}</div>
+      sectionEl.innerHTML = `
+        <div class="section-header" role="button" aria-expanded="true" tabindex="0">
+          <div class="section-left">
+            <h3 class="section-title">${highlight(s.title, q)}</h3>
+            <p class="section-sub">${highlight(s.subtitle, q)}</p>
+          </div>
+          <div class="section-right">
+            <span class="badge">${escapeHtml(s.tag)}</span>
+            <div class="chev" aria-hidden="true">⌄</div>
+          </div>
         </div>
-    `).join('');
-}
 
-function renderTags() {
-    const allTags = [...new Set(sections.flatMap(s => s.tags))];
-    tagsContainer.innerHTML = allTags.map(tag => `
-        <button class="tag">${tag}</button>
-    `).join('');
-}
-
-function renderSections() {
-    if (filteredSections.length === 0) {
-        sectionsContainer.innerHTML = '';
-        emptyState.style.display = 'block';
-        emptyStateText.textContent = `No sections found matching "${currentSearchQuery}"`;
-        return;
-    }
-
-    emptyState.style.display = 'none';
-
-    sectionsContainer.innerHTML = filteredSections.map(section => `
-        <div class="section ${expandedSections.has(section.id) ? 'expanded' : ''}" data-section-id="${section.id}">
-            <div class="section-header">
-                <div class="section-title-group">
-                    <div class="section-title">${section.title}</div>
-                    <div class="section-desc">${section.description}</div>
-                </div>
-                <div class="section-chevron">⌄</div>
-            </div>
-
-            <div class="section-content">
-                <div class="section-body">
-                    <p>${section.content}</p>
-
-                    ${section.subsections ? `
-                        <div class="subsections">
-                            ${section.subsections.map(sub => `
-                                <div class="section-subsection">
-                                    <div class="subsection-title">${sub.title}</div>
-                                    <div class="subsection-content">
-                                        ${sub.isCode ? `<pre class="code-block"><code>${escapeHtml(sub.content)}</code></pre>` : sub.content}
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-
-                    <div class="tags">
-                        ${section.tags.map(tag => `<span class="tag-item">${tag}</span>`).join('')}
-                    </div>
-                </div>
-            </div>
+        <div class="section-body">
+          <div class="methods">
+            ${s.methods.map(m => `
+              <p><code>${highlight(m.name, q)}</code> — ${highlight(m.desc, q)}</p>
+            `).join("")}
+          </div>
         </div>
-    `).join('');
+      `;
 
-    // Update navigation active state
-    document.querySelectorAll('.nav-item').forEach(item => {
-        const sectionId = item.dataset.sectionId;
-        item.classList.toggle('active', expandedSections.has(sectionId));
-    });
-}
-
-// ============================================================================
-// Scroll Functions
-// ============================================================================
-
-function handleScroll() {
-    const scrollPosition = window.scrollY;
-
-    // Show/hide FAB
-    if (scrollPosition > 300) {
-        fab.classList.add('show');
-    } else {
-        fab.classList.remove('show');
-    }
-
-    // Update active navigation based on scroll
-    updateActiveNavigation();
-}
-
-function updateActiveNavigation() {
-    const scrollPosition = window.scrollY + 100;
-
-    sections.forEach(section => {
-        const element = document.getElementById(section.id);
-        if (element) {
-            const elementTop = element.offsetTop;
-            const elementBottom = elementTop + element.offsetHeight;
-
-            if (scrollPosition >= elementTop && scrollPosition < elementBottom) {
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                const navItem = document.querySelector(`[data-section-id="${section.id}"]`);
-                if (navItem) {
-                    navItem.classList.add('active');
-                }
-            }
+      // toggle open/close
+      const header = sectionEl.querySelector(".section-header");
+      header.addEventListener("click", () => toggleSection(sectionEl));
+      header.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggleSection(sectionEl);
         }
+      });
+
+      sectionsContainer.appendChild(sectionEl);
     });
-}
 
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-}
-
-// ============================================================================
-// Utility Functions
-// ============================================================================
-
-function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
-    };
-    return text.replace(/[&<>"']/g, m => map[m]);
-}
-
-// ============================================================================
-// Keyboard Shortcuts
-// ============================================================================
-
-document.addEventListener('keydown', (e) => {
-    // Ctrl/Cmd + K to focus search
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        searchInput.focus();
+    // empty state
+    const any = visibleCount > 0;
+    emptyState.style.display = any ? "none" : "block";
+    if (!any) {
+      emptyStateText.textContent = q
+        ? `No results for "${q}". Try a different keyword or clear search.`
+        : `No sections to show.`;
     }
 
-    // Escape to close sidebar
-    if (e.key === 'Escape') {
-        closeSidebarMenu();
+    // meta
+    if (!q) {
+      searchMeta.textContent = "";
+    } else {
+      searchMeta.textContent = `${visibleCount} section(s), ~${totalMatches} match(es)`;
     }
-});
+
+    // update clear icon visibility
+    document.querySelector(".search-container")?.classList.toggle("has-text", !!q);
+
+    // ensure nav highlight works after render
+    requestAnimationFrame(updateActiveNav);
+  }
+
+  function toggleSection(sectionEl, forceOpen = null) {
+    const willOpen = (forceOpen === null) ? !sectionEl.classList.contains("open") : forceOpen;
+    sectionEl.classList.toggle("open", willOpen);
+    const header = sectionEl.querySelector(".section-header");
+    header.setAttribute("aria-expanded", String(willOpen));
+  }
+
+  function expandAll() {
+    document.querySelectorAll(".doc-section").forEach((s) => toggleSection(s, true));
+  }
+  function collapseAll() {
+    document.querySelectorAll(".doc-section").forEach((s) => toggleSection(s, false));
+  }
+
+  // ---------------------------
+  // Sidebar open/close
+  // ---------------------------
+  function openSidebarUI() {
+    sidebar.classList.add("open");
+    overlay.classList.add("show");
+  }
+  function closeSidebarUI(onlyMobile = false) {
+    // on desktop sidebar is sticky visible (CSS) — avoid closing if wide
+    if (onlyMobile && window.matchMedia("(min-width: 980px)").matches) return;
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+  }
+
+  menuToggle.addEventListener("click", () => openSidebarUI());
+  closeSidebar.addEventListener("click", () => closeSidebarUI());
+  overlay.addEventListener("click", () => closeSidebarUI());
+
+  // ---------------------------
+  // Search
+  // ---------------------------
+  function onSearch() {
+    renderSections();
+
+    // auto expand matching sections (already open by default)
+    // jump to first match with Enter
+  }
+
+  searchInput.addEventListener("input", onSearch);
+
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const first = document.querySelector(".doc-section");
+      if (first) first.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    if (e.key === "Escape") {
+      searchInput.value = "";
+      onSearch();
+      searchInput.blur();
+    }
+  });
+
+  function clearSearchNow() {
+    searchInput.value = "";
+    activeTag = null;
+    buildTags();
+    onSearch();
+    showToast("Search cleared");
+  }
+
+  clearSearch.addEventListener("click", clearSearchNow);
+  clearSearchBtn?.addEventListener("click", clearSearchNow);
+
+  // Ctrl/⌘ + K to focus search
+  document.addEventListener("keydown", (e) => {
+    const isMac = navigator.platform.toLowerCase().includes("mac");
+    const mod = isMac ? e.metaKey : e.ctrlKey;
+    if (mod && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+    }
+  });
+
+  // ---------------------------
+  // Active nav highlight + reading progress + FAB
+  // ---------------------------
+  function updateReadingProgress() {
+    const doc = document.documentElement;
+    const scrollTop = doc.scrollTop || document.body.scrollTop;
+    const height = doc.scrollHeight - doc.clientHeight;
+    const percent = height > 0 ? (scrollTop / height) * 100 : 0;
+    readingProgress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+
+    // fab show
+    fab.style.display = scrollTop > 420 ? "grid" : "none";
+  }
+
+  function updateActiveNav() {
+    const sectionsEls = [...document.querySelectorAll(".doc-section")];
+    if (!sectionsEls.length) return;
+
+    let best = sectionsEls[0];
+    const fromTop = window.scrollY + 120;
+
+    for (const el of sectionsEls) {
+      if (el.offsetTop <= fromTop) best = el;
+    }
+
+    document.querySelectorAll(".nav-link").forEach((a) => {
+      a.classList.toggle("active", a.dataset.target === best.id);
+    });
+  }
+
+  window.addEventListener("scroll", () => {
+    updateReadingProgress();
+    updateActiveNav();
+  }, { passive: true });
+
+  fab.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+
+  // ---------------------------
+  // Expand / Collapse
+  // ---------------------------
+  expandBtn.addEventListener("click", () => {
+    expandAll();
+    showToast("Expanded all sections");
+  });
+  collapseBtn.addEventListener("click", () => {
+    collapseAll();
+    showToast("Collapsed all sections");
+  });
+
+  // ---------------------------
+  // Theme toggle
+  // ---------------------------
+  function setTheme(next) {
+    document.documentElement.setAttribute("data-theme", next);
+    localStorage.setItem("du_theme", next);
+    showToast(`Theme: ${next}`);
+  }
+  themeBtn.addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme") || "dark";
+    setTheme(cur === "dark" ? "light" : "dark");
+  });
+
+  // ---------------------------
+  // Copy install command
+  // ---------------------------
+  copyCmdBtn?.addEventListener("click", async () => {
+    const cmd = "pip install datautility";
+    try {
+      await navigator.clipboard.writeText(cmd);
+      showToast("Copied: pip install datautility");
+    } catch {
+      showToast("Could not copy (browser blocked)");
+    }
+  });
+
+  // ---------------------------
+  // Init
+  // ---------------------------
+  const savedTheme = localStorage.getItem("du_theme");
+  if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
+
+  buildNav();
+  buildTags();
+  renderSections();
+  updateReadingProgress();
+  updateActiveNav();
+})();
