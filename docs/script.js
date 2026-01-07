@@ -1,6 +1,3 @@
-/* -------------------------
-   DataUtility Docs Interactions
--------------------------- */
 (function () {
   const $ = (id) => document.getElementById(id);
 
@@ -9,31 +6,23 @@
   const overlay = $("overlay");
   const closeSidebar = $("closeSidebar");
 
-  const searchInput = $("searchInput");
-  const clearSearch = $("clearSearch");
-  const clearSearchBtn = $("clearSearchBtn");
-  const searchMeta = $("searchMeta");
-
   const navMenu = $("navMenu");
   const tagsContainer = $("tagsContainer");
   const sectionsContainer = $("sectionsContainer");
 
-  const expandBtn = $("expandBtn");
-  const collapseBtn = $("collapseBtn");
-  const themeBtn = $("themeBtn");
-
-  const fab = $("fab");
-  const toast = $("toast");
-  const readingProgress = $("readingProgress");
+  const searchInput = $("searchInput");
+  const clearSearch = $("clearSearch");
+  const clearSearchBtn = $("clearSearchBtn");
   const emptyState = $("emptyState");
   const emptyStateText = $("emptyStateText");
+  const searchMeta = document.getElementById("searchMeta"); // optional (if not in HTML, code still works)
 
-  const copyCmdBtn = $("copyCmdBtn");
+  const expandBtn = $("expandBtn");
+  const collapseBtn = $("collapseBtn");
+  const fab = $("fab");
 
-  // ---------------------------
-  // Demo data (REMOVE if you already generate your docs from your library)
-  // ---------------------------
-  const DEMO_SECTIONS = [
+  // ---------- Demo sections (REMOVE if you already build from real data) ----------
+  const SECTIONS = [
     {
       id: "missing-values",
       title: "Missing Values",
@@ -42,7 +31,7 @@
       methods: [
         { name: "missingRows()", desc: "Return rows that contain at least one missing value." },
         { name: "missingColumns()", desc: "Return columns that contain at least one missing value." },
-        { name: "fillMissingValues(strategy='mean')", desc: "Fill missing values using mean/median/mode or custom value." },
+        { name: "fillMissingValues(strategy='mean')", desc: "Fill missing values using mean/median/mode or a constant value." },
       ],
     },
     {
@@ -51,24 +40,24 @@
       subtitle: "Detect and remove duplicates with control",
       tag: "Cleaning",
       methods: [
-        { name: "duplicateRows()", desc: "Return duplicated rows (keep='first'/'last'/False)." },
-        { name: "dropDuplicates()", desc: "Drop duplicates with subset columns support." },
+        { name: "duplicateRows(keep='first')", desc: "Return duplicated rows based on keep behavior." },
+        { name: "dropDuplicates(subset=None)", desc: "Drop duplicates with optional subset columns." },
       ],
     },
     {
       id: "outliers",
       title: "Outliers",
-      subtitle: "IQR / z-score detection + safe reporting",
+      subtitle: "IQR detection + summary reporting",
       tag: "EDA",
       methods: [
         { name: "detectOutliersIQR(k=1.5)", desc: "Return rows containing outliers by IQR threshold." },
-        { name: "outlierSummary()", desc: "Summary table of outlier counts per numeric column." },
+        { name: "outlierSummary()", desc: "Outlier count per numeric column." },
       ],
     },
     {
       id: "encoding",
       title: "Encoding",
-      subtitle: "Categorical encoding helpers",
+      subtitle: "One-hot / label encoding helpers",
       tag: "Features",
       methods: [
         { name: "oneHotEncode(cols)", desc: "One-hot encode selected columns safely." },
@@ -77,20 +66,7 @@
     },
   ];
 
-  // ---------------------------
-  // Helpers
-  // ---------------------------
-  function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add("show");
-    window.clearTimeout(showToast._t);
-    showToast._t = window.setTimeout(() => toast.classList.remove("show"), 1600);
-  }
-
-  function slugify(s) {
-    return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-  }
-
+  // ---------- Helpers ----------
   function escapeHtml(str) {
     return String(str)
       .replaceAll("&", "&amp;")
@@ -107,189 +83,217 @@
     return safe.replace(re, "<mark>$1</mark>");
   }
 
-  // ---------------------------
-  // Build UI from sections
-  // ---------------------------
-  let sections = DEMO_SECTIONS; // replace with your real data if you have it
-  let activeTag = null;
+  function isDesktop() {
+    return window.matchMedia("(min-width: 1024px)").matches;
+  }
 
-  function buildNav() {
+  function openSidebar() {
+    if (isDesktop()) return; // desktop sidebar is always visible
+    sidebar.classList.add("open");
+    overlay.classList.add("show");
+  }
+
+  function closeSidebarUI() {
+    if (isDesktop()) return;
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+  }
+
+  // ---------- Build Nav ----------
+  function buildNav(data) {
     navMenu.innerHTML = "";
-    sections.forEach((s) => {
+    data.forEach((s) => {
       const a = document.createElement("a");
       a.href = `#${s.id}`;
       a.className = "nav-link";
       a.dataset.target = s.id;
       a.innerHTML = `<span>${escapeHtml(s.title)}</span><small>${escapeHtml(s.tag)}</small>`;
-      a.addEventListener("click", () => closeSidebarUI(true));
+      a.addEventListener("click", () => closeSidebarUI());
       navMenu.appendChild(a);
     });
   }
 
-  function buildTags() {
-    const tags = [...new Set(sections.map((s) => s.tag))].sort();
+  // ---------- Tags ----------
+  let activeTag = null;
+
+  function buildTags(data) {
+    const tags = [...new Set(data.map((s) => s.tag))].sort();
     tagsContainer.innerHTML = "";
 
-    const all = document.createElement("button");
-    all.className = "tag" + (!activeTag ? " active" : "");
-    all.textContent = "All";
-    all.addEventListener("click", () => {
+    const make = (label, isActive, onClick) => {
+      const b = document.createElement("button");
+      b.className = "tag" + (isActive ? " active" : "");
+      b.textContent = label;
+      b.addEventListener("click", onClick);
+      tagsContainer.appendChild(b);
+    };
+
+    make("All", !activeTag, () => {
       activeTag = null;
-      buildTags();
-      renderSections();
+      buildTags(data);
+      render(data);
     });
-    tagsContainer.appendChild(all);
 
     tags.forEach((t) => {
-      const b = document.createElement("button");
-      b.className = "tag" + (activeTag === t ? " active" : "");
-      b.textContent = t;
-      b.addEventListener("click", () => {
-        activeTag = (activeTag === t) ? null : t;
-        buildTags();
-        renderSections();
+      make(t, activeTag === t, () => {
+        activeTag = activeTag === t ? null : t;
+        buildTags(data);
+        render(data);
       });
-      tagsContainer.appendChild(b);
     });
   }
 
-  function renderSections() {
-    const q = searchInput.value.trim();
-    const filtered = sections.filter((s) => !activeTag || s.tag === activeTag);
+  // ---------- Accordion animation ----------
+  function setOpen(sectionEl, open) {
+    const body = sectionEl.querySelector(".section-body");
+    const inner = sectionEl.querySelector(".section-body-inner");
+    if (!body || !inner) return;
+
+    if (open) {
+      sectionEl.classList.add("open");
+      const h = inner.scrollHeight;
+      body.style.height = h + "px";
+      // after animation, set to auto-height feel by keeping px but updating on resize
+    } else {
+      const h = inner.scrollHeight;
+      body.style.height = h + "px";
+      requestAnimationFrame(() => {
+        body.style.height = "0px";
+        sectionEl.classList.remove("open");
+      });
+    }
+  }
+
+  function toggle(sectionEl) {
+    const open = sectionEl.classList.contains("open");
+    setOpen(sectionEl, !open);
+  }
+
+  function expandAll() {
+    document.querySelectorAll(".doc-section").forEach((el) => setOpen(el, true));
+  }
+  function collapseAll() {
+    document.querySelectorAll(".doc-section").forEach((el) => setOpen(el, false));
+  }
+
+  // ---------- Render sections ----------
+  function render(data) {
+    const q = searchInput.value.trim().toLowerCase();
+    const filtered = data.filter((s) => !activeTag || s.tag === activeTag);
 
     sectionsContainer.innerHTML = "";
-    let visibleCount = 0;
-    let totalMatches = 0;
+
+    let visible = 0;
+    let matches = 0;
 
     filtered.forEach((s) => {
-      // compute match
-      const hay = (s.title + " " + s.subtitle + " " + s.methods.map(m => m.name + " " + m.desc).join(" ")).toLowerCase();
-      const isMatch = !q || hay.includes(q.toLowerCase());
+      const hay =
+        (s.title + " " + s.subtitle + " " + s.methods.map(m => m.name + " " + m.desc).join(" ")).toLowerCase();
 
-      if (!isMatch) return;
+      if (q && !hay.includes(q)) return;
 
-      visibleCount++;
+      visible++;
+
+      if (q) {
+        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig");
+        const m = hay.match(re);
+        matches += m ? m.length : 0;
+      }
 
       const sectionEl = document.createElement("article");
       sectionEl.className = "doc-section open";
       sectionEl.id = s.id;
 
-      // count matches (simple)
-      if (q) {
-        const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "ig");
-        const matches = hay.match(re);
-        totalMatches += matches ? matches.length : 0;
-      }
-
       sectionEl.innerHTML = `
-        <div class="section-header" role="button" aria-expanded="true" tabindex="0">
+        <div class="section-header" role="button" tabindex="0" aria-expanded="true">
           <div class="section-left">
             <h3 class="section-title">${highlight(s.title, q)}</h3>
             <p class="section-sub">${highlight(s.subtitle, q)}</p>
           </div>
           <div class="section-right">
             <span class="badge">${escapeHtml(s.tag)}</span>
-            <div class="chev" aria-hidden="true">⌄</div>
+            <div class="chev">⌄</div>
           </div>
         </div>
 
         <div class="section-body">
-          <div class="methods">
-            ${s.methods.map(m => `
-              <p><code>${highlight(m.name, q)}</code> — ${highlight(m.desc, q)}</p>
-            `).join("")}
+          <div class="section-body-inner">
+            <div class="methods">
+              ${s.methods.map(m => `
+                <p><code>${highlight(m.name, q)}</code> — ${highlight(m.desc, q)}</p>
+              `).join("")}
+            </div>
           </div>
         </div>
       `;
 
-      // toggle open/close
       const header = sectionEl.querySelector(".section-header");
-      header.addEventListener("click", () => toggleSection(sectionEl));
+      header.addEventListener("click", () => toggle(sectionEl));
       header.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          toggleSection(sectionEl);
+          toggle(sectionEl);
         }
       });
 
       sectionsContainer.appendChild(sectionEl);
+
+      // fix initial height for smooth accordion
+      requestAnimationFrame(() => {
+        const inner = sectionEl.querySelector(".section-body-inner");
+        const body = sectionEl.querySelector(".section-body");
+        if (inner && body) body.style.height = inner.scrollHeight + "px";
+      });
     });
 
     // empty state
-    const any = visibleCount > 0;
-    emptyState.style.display = any ? "none" : "block";
-    if (!any) {
-      emptyStateText.textContent = q
-        ? `No results for "${q}". Try a different keyword or clear search.`
-        : `No sections to show.`;
-    }
-
-    // meta
-    if (!q) {
-      searchMeta.textContent = "";
+    if (!visible) {
+      emptyState.style.display = "block";
+      emptyStateText.textContent = q ? `No results for "${q}".` : "No sections available.";
     } else {
-      searchMeta.textContent = `${visibleCount} section(s), ~${totalMatches} match(es)`;
+      emptyState.style.display = "none";
     }
 
-    // update clear icon visibility
+    // search meta + clear icon
     document.querySelector(".search-container")?.classList.toggle("has-text", !!q);
+    if (searchMeta) {
+      searchMeta.textContent = q ? `${visible} section(s), ~${matches} match(es)` : "";
+    }
 
-    // ensure nav highlight works after render
+    // update nav highlight after rendering
     requestAnimationFrame(updateActiveNav);
   }
 
-  function toggleSection(sectionEl, forceOpen = null) {
-    const willOpen = (forceOpen === null) ? !sectionEl.classList.contains("open") : forceOpen;
-    sectionEl.classList.toggle("open", willOpen);
-    const header = sectionEl.querySelector(".section-header");
-    header.setAttribute("aria-expanded", String(willOpen));
-  }
+  // ---------- Active nav highlight ----------
+  function updateActiveNav() {
+    const sections = [...document.querySelectorAll(".doc-section")];
+    if (!sections.length) return;
 
-  function expandAll() {
-    document.querySelectorAll(".doc-section").forEach((s) => toggleSection(s, true));
-  }
-  function collapseAll() {
-    document.querySelectorAll(".doc-section").forEach((s) => toggleSection(s, false));
-  }
+    const fromTop = window.scrollY + 120;
+    let current = sections[0];
 
-  // ---------------------------
-  // Sidebar open/close
-  // ---------------------------
-  function openSidebarUI() {
-    sidebar.classList.add("open");
-    overlay.classList.add("show");
-  }
-  function closeSidebarUI(onlyMobile = false) {
-    // on desktop sidebar is sticky visible (CSS) — avoid closing if wide
-    if (onlyMobile && window.matchMedia("(min-width: 980px)").matches) return;
-    sidebar.classList.remove("open");
-    overlay.classList.remove("show");
-  }
-
-  menuToggle.addEventListener("click", () => openSidebarUI());
-  closeSidebar.addEventListener("click", () => closeSidebarUI());
-  overlay.addEventListener("click", () => closeSidebarUI());
-
-  // ---------------------------
-  // Search
-  // ---------------------------
-  function onSearch() {
-    renderSections();
-
-    // auto expand matching sections (already open by default)
-    // jump to first match with Enter
-  }
-
-  searchInput.addEventListener("input", onSearch);
-
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const first = document.querySelector(".doc-section");
-      if (first) first.scrollIntoView({ behavior: "smooth", block: "start" });
+    for (const s of sections) {
+      if (s.offsetTop <= fromTop) current = s;
     }
+
+    document.querySelectorAll(".nav-link").forEach((a) => {
+      a.classList.toggle("active", a.dataset.target === current.id);
+    });
+  }
+
+  // ---------- Events ----------
+  menuToggle?.addEventListener("click", openSidebar);
+  closeSidebar?.addEventListener("click", closeSidebarUI);
+  overlay?.addEventListener("click", closeSidebarUI);
+
+  expandBtn?.addEventListener("click", expandAll);
+  collapseBtn?.addEventListener("click", collapseAll);
+
+  searchInput?.addEventListener("input", () => render(SECTIONS));
+  searchInput?.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       searchInput.value = "";
-      onSearch();
+      render(SECTIONS);
       searchInput.blur();
     }
   });
@@ -297,109 +301,34 @@
   function clearSearchNow() {
     searchInput.value = "";
     activeTag = null;
-    buildTags();
-    onSearch();
-    showToast("Search cleared");
+    buildTags(SECTIONS);
+    render(SECTIONS);
   }
-
-  clearSearch.addEventListener("click", clearSearchNow);
+  clearSearch?.addEventListener("click", clearSearchNow);
   clearSearchBtn?.addEventListener("click", clearSearchNow);
 
-  // Ctrl/⌘ + K to focus search
-  document.addEventListener("keydown", (e) => {
-    const isMac = navigator.platform.toLowerCase().includes("mac");
-    const mod = isMac ? e.metaKey : e.ctrlKey;
-    if (mod && e.key.toLowerCase() === "k") {
-      e.preventDefault();
-      searchInput.focus();
-      searchInput.select();
-    }
-  });
-
-  // ---------------------------
-  // Active nav highlight + reading progress + FAB
-  // ---------------------------
-  function updateReadingProgress() {
-    const doc = document.documentElement;
-    const scrollTop = doc.scrollTop || document.body.scrollTop;
-    const height = doc.scrollHeight - doc.clientHeight;
-    const percent = height > 0 ? (scrollTop / height) * 100 : 0;
-    readingProgress.style.width = `${Math.min(100, Math.max(0, percent))}%`;
-
-    // fab show
-    fab.style.display = scrollTop > 420 ? "grid" : "none";
-  }
-
-  function updateActiveNav() {
-    const sectionsEls = [...document.querySelectorAll(".doc-section")];
-    if (!sectionsEls.length) return;
-
-    let best = sectionsEls[0];
-    const fromTop = window.scrollY + 120;
-
-    for (const el of sectionsEls) {
-      if (el.offsetTop <= fromTop) best = el;
-    }
-
-    document.querySelectorAll(".nav-link").forEach((a) => {
-      a.classList.toggle("active", a.dataset.target === best.id);
-    });
-  }
-
+  // FAB
   window.addEventListener("scroll", () => {
-    updateReadingProgress();
     updateActiveNav();
-  }, { passive: true });
+    const y = window.scrollY || document.documentElement.scrollTop;
+    fab.style.display = y > 420 ? "grid" : "none";
+  }, { passive:true });
 
-  fab.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  fab?.addEventListener("click", () => window.scrollTo({ top:0, behavior:"smooth" }));
 
-  // ---------------------------
-  // Expand / Collapse
-  // ---------------------------
-  expandBtn.addEventListener("click", () => {
-    expandAll();
-    showToast("Expanded all sections");
-  });
-  collapseBtn.addEventListener("click", () => {
-    collapseAll();
-    showToast("Collapsed all sections");
-  });
-
-  // ---------------------------
-  // Theme toggle
-  // ---------------------------
-  function setTheme(next) {
-    document.documentElement.setAttribute("data-theme", next);
-    localStorage.setItem("du_theme", next);
-    showToast(`Theme: ${next}`);
-  }
-  themeBtn.addEventListener("click", () => {
-    const cur = document.documentElement.getAttribute("data-theme") || "dark";
-    setTheme(cur === "dark" ? "light" : "dark");
+  // keep accordion heights correct on resize
+  window.addEventListener("resize", () => {
+    document.querySelectorAll(".doc-section.open").forEach((sectionEl) => {
+      const inner = sectionEl.querySelector(".section-body-inner");
+      const body = sectionEl.querySelector(".section-body");
+      if (inner && body) body.style.height = inner.scrollHeight + "px";
+    });
   });
 
-  // ---------------------------
-  // Copy install command
-  // ---------------------------
-  copyCmdBtn?.addEventListener("click", async () => {
-    const cmd = "pip install datautility";
-    try {
-      await navigator.clipboard.writeText(cmd);
-      showToast("Copied: pip install datautility");
-    } catch {
-      showToast("Could not copy (browser blocked)");
-    }
-  });
-
-  // ---------------------------
-  // Init
-  // ---------------------------
-  const savedTheme = localStorage.getItem("du_theme");
-  if (savedTheme) document.documentElement.setAttribute("data-theme", savedTheme);
-
-  buildNav();
-  buildTags();
-  renderSections();
-  updateReadingProgress();
+  // ---------- Init ----------
+  buildNav(SECTIONS);
+  buildTags(SECTIONS);
+  render(SECTIONS);
   updateActiveNav();
+
 })();
